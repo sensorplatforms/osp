@@ -1,0 +1,78 @@
+<project xmlns:xi="http://www.w3.org/2001/XInclude" type="Basic C project" name="periph_spi_rom_interrupt" chip="LPC54xxx" vendor="NXP">
+	<filelist name="nxp_lpcxpresso_54000_periph_spi_rom_interrupt">
+		<import name="nxp_lpcxpresso_54000_periph_spi_rom_interrupt_src" src="../../../../../../applications/lpc540xx/examples/periph/periph_spi_rom_interrupt" dest="example/src">
+			<include>*.c</include>
+		</import>
+		<import name="nxp_lpcxpresso_54000_periph_spi_rom_interrupt_inc" src="../../../../../../applications/lpc540xx/examples/periph/periph_spi_rom_interrupt" dest="example/src">
+			<include>*.h</include>
+		</import>
+		<import name="nxp_lpcxpresso_54000_periph_spi_rom_interrupt_doc" src="../../../../../../applications/lpc540xx/examples/periph/periph_spi_rom_interrupt" dest="example">
+			<include>*.dox</include>
+			<include>*.txt</include>
+		</import>
+		<import name="nxp_lpcxpresso_54000_periph_spi_rom_interrupt_sysinit" src="../../../../../../applications/lpc540xx/startup_code" dest="example/src">
+			<copy>sysinit.c</copy>
+		</import>
+		<import name="nxp_lpcxpresso_54000_periph_spi_rom_interrupt_startup" src="../../../../../../applications/lpc540xx/startup_code" dest="example/src">
+			<copy>cr_startup_lpc540xx.c</copy>
+		</import>
+	</filelist>
+	<cfglist name="nxp_lpcxpresso_54000_periph_spi_rom_interrupt">
+		<setting name="nxp_lpcxpresso_54000_periph_spi_rom_interrupt_cdef" id="compiler.def">
+			<value>__USE_LPCOPEN</value>
+		</setting>
+		<setting id="assembler.c.header">
+			<value>Redlib</value>
+		</setting>
+		<setting id="compiler.c.header">
+			<value>Redlib</value>
+		</setting>
+		<setting id="linker.library.type">
+			<value>Redlib (nohost)</value>
+		</setting>
+		<setting id="linker.libs">
+			<value>lpc_board_nxp_lpcxpresso_54000</value>
+			<value>lpc_chip_540xx</value>
+		</setting>
+		<setting name="nxp_lpcxpresso_54000_periph_spi_rom_interrupt_incdir" id="compiler.inc">
+			<value>${workspace_loc:/lpc_chip_540xx/inc}</value>
+			<value>${workspace_loc:/lpc_board_nxp_lpcxpresso_54000/inc}</value>
+		</setting>
+		<setting id="linker.paths" buildType="Debug">
+			<value>${workspace_loc:/lpc_chip_540xx/Debug}</value>
+			<value>${workspace_loc:/lpc_board_nxp_lpcxpresso_54000/Debug}</value>
+		</setting>
+		<setting id="linker.paths" buildType="Release">
+			<value>${workspace_loc:/lpc_chip_540xx/Release}</value>
+			<value>${workspace_loc:/lpc_board_nxp_lpcxpresso_54000/Release}</value>
+		</setting>
+		<requires>
+			<value>lpc_chip_540xx</value>
+			<value>lpc_board_nxp_lpcxpresso_54000</value>
+		</requires>
+		<setting id="assembler.fp">
+			<value>com.crt.advproject.gas.fpu.fpv4</value>
+		</setting>
+		<setting id="compiler.c.fp">
+			<value>com.crt.advproject.gcc.fpu.fpv4</value>
+		</setting>
+		<setting id="cpp.compiler.c.fp">
+			<value>com.crt.advproject.cpp.fpu.fpv4</value>
+		</setting>
+		<setting id="all.compiler.flags">
+			<value>-fsingle-precision-constant</value>
+		</setting>
+		<setting id="linker.fp">
+			<value>com.crt.advproject.link.fpu.fpv4</value>
+		</setting>
+		<setting id="compiler.def">
+			<value>CORE_M4</value>
+		</setting>
+		<setting id="linker.paths">
+			<value>${workspace_loc:/lpc_chip_540xx/libs}</value>
+		</setting>
+		<setting id="linker.libs">
+			<value>pmu_library</value>
+		</setting>
+	</cfglist>
+</project>

@@ -1,0 +1,62 @@
+<workspace xmlns:xi="http://www.w3.org/2001/XInclude">
+	<prjgroup name="libchip">
+		<project description="libchip/libchip/libchip.xml"/>
+	</prjgroup>
+	<prjgroup name="libboard">
+		<project description="libboard/libboard/libboard.xml"/>
+	</prjgroup>
+	<prjgroup name="periph">
+		<project description="periph/blinky/blinky.xml"/>
+		<project description="periph/bod/bod.xml"/>
+		<project description="periph/clkout/clkout.xml"/>
+		<project description="periph/crc/crc.xml"/>
+		<project description="periph/flashiap/flashiap.xml"/>
+		<project description="periph/freqmeasure/freqmeasure.xml"/>
+		<project description="periph/gint/gint.xml"/>
+		<project description="periph/mrt/mrt.xml"/>
+		<project description="periph/pinint/pinint.xml"/>
+		<project description="periph/pllfract/pllfract.xml"/>
+		<project description="periph/ritimer/ritimer.xml"/>
+		<project description="periph/rtc/rtc.xml"/>
+		<project description="periph/rtcut/rtcut.xml"/>
+		<project description="periph/sct/sct.xml"/>
+		<project description="periph/sct_pwm/sct_pwm.xml"/>
+		<project description="periph/timer/timer.xml"/>
+		<project description="periph/utick/utick.xml"/>
+		<project description="periph/wakeup/wakeup.xml"/>
+		<project description="periph/wwdt/wwdt.xml"/>
+	</prjgroup>
+	<prjgroup name="rom">
+		<project description="rom/adc_int/adc_int.xml"/>
+		<project description="rom/adc_int_dma/adc_int_dma.xml"/>
+		<project description="rom/adc_polling/adc_polling.xml"/>
+		<project description="rom/dma_m2m/dma_m2m.xml"/>
+		<project description="rom/i2cmon/i2cmon.xml"/>
+		<project description="rom/i2cm_int/i2cm_int.xml"/>
+		<project description="rom/i2cm_int_dma/i2cm_int_dma.xml"/>
+		<project description="rom/i2cm_polling/i2cm_polling.xml"/>
+		<project description="rom/i2cs_int/i2cs_int.xml"/>
+		<project description="rom/i2cs_int_dma/i2cs_int_dma.xml"/>
+		<project description="rom/i2cs_polling/i2cs_polling.xml"/>
+		<project description="rom/spim_int/spim_int.xml"/>
+		<project description="rom/spim_int_dma/spim_int_dma.xml"/>
+		<project description="rom/spim_polling/spim_polling.xml"/>
+		<project description="rom/spis_int/spis_int.xml"/>
+		<project description="rom/spis_int_dma/spis_int_dma.xml"/>
+		<project description="rom/spis_polling/spis_polling.xml"/>
+		<project description="rom/uart_int/uart_int.xml"/>
+		<project description="rom/uart_int_dma/uart_int_dma.xml"/>
+		<project description="rom/uart_int_sfifo/uart_int_sfifo.xml"/>
+		<project description="rom/uart_polling/uart_polling.xml"/>
+	</prjgroup>
+	<prjgroup name="freertos">
+		<project description="freertos/blinky/blinky.xml"/>
+	</prjgroup>
+	<prjgroup name="multicore">
+		<project description="multicore/libchip_m0/libchip_m0.xml"/>
+		<project description="multicore/libboard_m0/libboard_m0.xml"/>
+		<project description="multicore/m0slave_blinky/m0slave_blinky.xml"/>
+		<project description="multicore/m4master_blinky/m4master_blinky.xml"/>
+	</prjgroup>
+</workspace>
+

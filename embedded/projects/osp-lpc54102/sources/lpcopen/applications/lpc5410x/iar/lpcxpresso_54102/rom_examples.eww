@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<workspace>
+  <project>
+    <path>$WS_DIR$\..\..\..\..\software\lpc_core\lpc_chip\chip_5410x\lib_chip_5410x.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\..\..\..\..\software\lpc_core\lpc_board\boards_5410x\lpcxpresso_54102\lib_board_lpcxpresso_54102.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\rom\adc_int\adc_int.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\rom\adc_int_dma\adc_int_dma.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\rom\adc_polling\adc_polling.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\rom\dma_m2m\dma_m2m.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\rom\i2cmon\i2cmon.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\rom\i2cm_int\i2cm_int.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\rom\i2cm_int_dma\i2cm_int_dma.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\rom\i2cm_polling\i2cm_polling.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\rom\i2cs_int\i2cs_int.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\rom\i2cs_int_dma\i2cs_int_dma.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\rom\i2cs_polling\i2cs_polling.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\rom\spim_int\spim_int.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\rom\spim_int_dma\spim_int_dma.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\rom\spim_polling\spim_polling.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\rom\spis_int\spis_int.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\rom\spis_int_dma\spis_int_dma.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\rom\spis_polling\spis_polling.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\rom\uart_int\uart_int.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\rom\uart_int_sfifo\uart_int_sfifo.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\rom\uart_int_dma\uart_int_dma.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\rom\uart_polling\uart_polling.ewp</path>
+  </project>
+  <batchBuild/>
+</workspace>
+
+

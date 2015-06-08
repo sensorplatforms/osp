@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<workspace>
+  <project>
+    <path>$WS_DIR$\..\..\..\..\software\lpc_core\lpc_chip\chip_5410x\lib_chip_5410x.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\..\..\..\..\software\lpc_core\lpc_board\boards_5410x\lpcxpresso_54102\lib_board_lpcxpresso_54102.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\periph\blinky\blinky.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\periph\bod\bod.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\periph\clkout\clkout.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\periph\crc\crc.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\periph\flashiap\flashiap.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\periph\freqmeasure\freqmeasure.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\periph\gint\gint.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\periph\mrt\mrt.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\periph\pinint\pinint.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\periph\pllfract\pllfract.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\periph\ritimer\ritimer.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\periph\rtc\rtc.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\periph\rtcut\rtcut.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\periph\sct\sct.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\periph\sct_pwm\sct_pwm.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\periph\timer\timer.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\periph\utick\utick.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\periph\wakeup\wakeup.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\periph\wwdt\wwdt.ewp</path>
+  </project>
+  <batchBuild/>
+</workspace>
+
+

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<workspace>
+  <project>
+    <path>$WS_DIR$\..\..\..\..\software\lpc_core\lpc_board\boards_540xx\nxp_lpcxpresso_54000\lib_lpc_board_nxp_lpcxpresso_54000.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\..\..\..\..\software\lpc_core\lpc_chip\chip_540xx\lib_lpc_chip_540xx.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\freertos\freertos_blinky\freertos_blinky.ewp</path>
+  </project>
+  <batchBuild/>
+</workspace>
+
+

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<ProjectWorkspace xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="project_mpw.xsd">
+
+  <SchemaVersion>1.0</SchemaVersion>
+
+  <Header>### uVision Project, (C) Keil Software</Header>
+
+  <WorkspaceName>WorkSpace</WorkspaceName>
+
+  <project>
+    <PathAndName>.\sources\lpcopen\software\lpc_core\lpc_board\boards_540xx\nxp_lpcxpresso_54000\lib_lpc_board_nxp_lpcxpresso_54000.uvproj</PathAndName>
+    <NodeIsExpanded>1</NodeIsExpanded>
+  </project>
+
+  <project>
+    <PathAndName>.\sources\lpcopen\software\lpc_core\lpc_chip\chip_540xx\lib_lpc_chip_540xx.uvproj</PathAndName>
+    <NodeIsExpanded>1</NodeIsExpanded>
+  </project>
+
+  <project>
+    <PathAndName>.\keil-mdk-build\osp-nxp-niobe.uvproj</PathAndName>
+    <NodeIsActive>1</NodeIsActive>
+    <NodeIsExpanded>1</NodeIsExpanded>
+  </project>
+
+  <project>
+    <PathAndName>..\..\..\..\..\..\..\Keil5\ARM\RL\RTX\RTX_Lib_CM.uvproj</PathAndName>
+  </project>
+
+</ProjectWorkspace>

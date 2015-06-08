@@ -1,0 +1,71 @@
+<project xmlns:xi="http://www.w3.org/2001/XInclude" type="Basic C project" name="multicore_m0slave_blinky" chip="LPC54102J512-M0" vendor="NXP">
+	<filelist name="lpcxpresso_54102_multicore_m0slave_blinky">
+		<import name="lpcxpresso_54102_multicore_m0slave_blinky_src" src="../../../../../../applications/lpc5410x/examples/multicore/m0slave_blinky" dest="example/src">
+			<include>*.c</include>
+		</import>
+		<import name="lpcxpresso_54102_multicore_m0slave_blinky_inc" src="../../../../../../applications/lpc5410x/examples/multicore/m0slave_blinky" dest="example/src">
+			<include>*.h</include>
+		</import>
+		<import name="lpcxpresso_54102_multicore_m0slave_blinky_doc" src="../../../../../../applications/lpc5410x/examples/multicore/m0slave_blinky" dest="example">
+			<include>*.dox</include>
+			<include>*.txt</include>
+		</import>
+		<import name="lpcxpresso_54102_multicore_m0slave_blinky_sysinit" src="../../../../../../applications/lpc5410x/startup" dest="example/src">
+			<copy>sysinit.c</copy>
+		</import>
+		<import name="lpcxpresso_54102_multicore_m0slave_blinky_startup" src="../../../../../../applications/lpc5410x/startup" dest="example/src">
+			<copy>cr_startup_lpc5410x-m0.c</copy>
+			<copy>crp.c</copy>
+		</import>
+	</filelist>
+	<cfglist name="lpcxpresso_54102_multicore_m0slave_blinky">
+		<setting name="lpcxpresso_54102_multicore_m0slave_blinky_cdef" id="compiler.def">
+			<value>__USE_LPCOPEN</value>
+		</setting>
+		<setting id="assembler.c.header">
+			<value>Redlib</value>
+		</setting>
+		<setting id="compiler.c.header">
+			<value>Redlib</value>
+		</setting>
+		<setting id="linker.library.type">
+			<value>Redlib (nohost)</value>
+		</setting>
+		<setting id="linker.libs">
+			<value>lpc_board_lpcxpresso_54102_m0</value>
+			<value>lpc_chip_5410x_m0</value>
+		</setting>
+		<setting name="lpcxpresso_54102_multicore_m0slave_blinky_incdir" id="compiler.inc">
+			<value>${workspace_loc:/lpc_chip_5410x_m0/inc}</value>
+			<value>${workspace_loc:/lpc_board_lpcxpresso_54102_m0/inc}</value>
+		</setting>
+		<setting id="linker.paths" buildType="Debug">
+			<value>${workspace_loc:/lpc_chip_5410x_m0/Debug}</value>
+			<value>${workspace_loc:/lpc_board_lpcxpresso_54102_m0/Debug}</value>
+		</setting>
+		<setting id="linker.paths" buildType="Release">
+			<value>${workspace_loc:/lpc_chip_5410x_m0/Release}</value>
+			<value>${workspace_loc:/lpc_board_lpcxpresso_54102_m0/Release}</value>
+		</setting>
+		<requires>
+			<value>lpc_chip_5410x_m0</value>
+			<value>lpc_board_lpcxpresso_54102_m0</value>
+		</requires>
+		<setting id="compiler.def">
+			<value>CORE_M0PLUS</value>
+		</setting>
+		<setting id="linker.crp">
+			<value>true</value>
+		</setting>
+		<setting id="linker.paths">
+			<value>${workspace_loc:/lpc_chip_5410x_m0/libs}</value>
+		</setting>
+		<setting id="linker.libs">
+			<value>power_m0</value>
+		</setting>
+		<memoryConfiguration href="../../../../../../applications/lpc5410x/examples/multicore/m0slave_blinky/lpcxpresso_mem.xml"/>
+		<setting id="linker.slave">
+			<value>M0SLAVE</value>
+		</setting>
+	</cfglist>
+</project>

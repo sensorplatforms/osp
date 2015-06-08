@@ -1,0 +1,5 @@
+<LPCOpenCfg>
+	<symbol name="varCPUCore" value="m4"/>
+	<symbol name="varChipPart" value="LPC54102J512"/>
+	<symbol name="varChipPartM0" value="LPC54102J512-M0"/>
+</LPCOpenCfg>

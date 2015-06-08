@@ -1,0 +1,47 @@
+This is an updated version of OSP. Development notes:
+
+1. The I2C driver is based on work done on this platform for another
+sensorhub @ SPI. Effort has been made to keep the I2C code seperate
+from the hardware specific code. Please do report any problems or potential
+issues with the isolation.
+
+There are 2 flavors of the I2C code, one for host and one for master mode.
+Master mode is used to access the sensors. This is implemented in
+sensacq_i2c.c. There should be little to no mods made to this. Slave mode is
+use to present the processed sensor data to the host Android device. This is
+implemented in hostif_i2c.c Changes has been made to work around latencies.
+In particular, a chaining interface has been added so another buffer
+can be immediately available. hostif_i2c.c does not know anything specific
+about OSP.
+
+OSP i2c communitications is implemented in i2c_slavecomm_t.c. Its job is
+to receive notices of sensor data and queue them as appropriate. It interfaces
+with the hardware through 1 primary interfaces. process_command() takes data
+from the hosts. It reacts by setting up buffers for the slave driver
+using Hostif_StartTx or the chained version. 
+
+Data flow for i2c_slavecomm_t.c:
+(a) Data enters the task via a message from the alg.
+(b) The message is encoded as a packet and placed into a queue. The encoding
+process will switch to a new queue depending on the full ness and time that 
+has passed. The queues are ready to go memory structures for i2c to send out.
+
+2. Enable/disable has been minimally implemented solely to avoid overflowing
+queues. Enable/disable is done by reading the appropriate register range.
+Reads to 0x20-0x50 will enable a sensor. Reads to 0x50-0x80 will disable a
+sensor. The register is 0x20 or 0x50 plus sensor number. This disable just
+prevents that particular sensor data from being placed into the queue.
+SigMoton is intentionally forced on.
+
+The correct longer term behavior is to unsubscribe the sensor from the
+alg and disable the physical sensor if appropriate.
+
+3. The constants in MQ_sensors.h have been renamed to avoid conflicts with
+existing defines. Overall there are 3 scopes/domains of sensor constants:
+(a) OSP defined constants.
+(b) FM lib defined constants.
+(c) MQ100 packet interface constants.
+These constants vary slightly and one needs to be careful not to mix
+them in the wrong interface. FMLib constants should not be visible outside of
+fmlib_algorithm.c as it will translate between FMlib constants and
+OSP constants.

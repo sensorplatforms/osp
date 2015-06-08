@@ -1,0 +1,23 @@
+<LPCOpenCfg>
+	<!-- Symbol Section -->
+	<symbol name="varExampleM0"        value="multicore_m0slave_blinky"/>
+
+	<!-- Module section -->
+	<module name="basic_example"/>
+
+	<!-- m0slave Blinky configurations -->
+	<template section="cfglist" tool="xpresso">
+		<setting id="linker.slave">
+			<value>Master</value>
+		</setting>
+		<setting id="linker.master.append" buildType="Debug">
+			<value>M0SLAVE,${workspace_loc:/${varExampleM0}/Debug/${varExampleM0}.axf.o},Ram1_32,,true;</value>
+		</setting>
+		<setting id="linker.master.append" buildType="Release">
+			<value>M0SLAVE,${workspace_loc:/${varExampleM0}/Release/${varExampleM0}.axf.o},Ram1_32,,true;</value>
+		</setting>
+		<requires>
+			<value>${varExampleM0}</value>
+		</requires>
+	</template>
+</LPCOpenCfg>

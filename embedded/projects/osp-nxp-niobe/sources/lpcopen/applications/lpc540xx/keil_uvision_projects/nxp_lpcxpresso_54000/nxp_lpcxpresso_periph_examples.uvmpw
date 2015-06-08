@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<ProjectWorkspace xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="project_mpw.xsd">
+
+  <SchemaVersion>1.0</SchemaVersion>
+
+  <Header>### uVision Project, (C) Keil Software</Header>
+
+  <WorkspaceName>WorkSpace</WorkspaceName>
+
+  <project>
+    <PathAndName>..\..\..\..\software\lpc_core\lpc_chip\chip_540xx\lib_lpc_chip_540xx.uvproj</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>..\..\..\..\software\lpc_core\lpc_board\boards_540xx\nxp_lpcxpresso_54000\lib_lpc_board_nxp_lpcxpresso_54000.uvproj</PathAndName>
+    <NodeIsExpanded>1</NodeIsExpanded>
+  </project>
+
+  <project>
+    <PathAndName>.\periph\periph_adc\periph_adc.uvproj</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\periph\periph_adc_dma_rom\periph_adc_dma_rom.uvproj</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\periph\periph_blinky\periph_blinky.uvproj</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\periph\periph_bod\periph_bod.uvproj</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\periph\periph_crc\periph_crc.uvproj</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\periph\periph_ctimer\periph_ctimer.uvproj</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\periph\periph_dma\periph_dma.uvproj</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\periph\periph_dma_rom\periph_dma_rom.uvproj</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\periph\periph_flashiap\periph_flashiap.uvproj</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\periph\periph_freqmeasure\periph_freqmeasure.uvproj</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\periph\periph_gint\periph_gint.uvproj</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\periph\periph_i2c_rom\periph_i2c_rom.uvproj</PathAndName>
+    <NodeIsActive>1</NodeIsActive>
+    <NodeIsExpanded>1</NodeIsExpanded>
+  </project>
+
+  <project>
+    <PathAndName>.\periph\periph_i2c_rom_slave\periph_i2c_rom_slave.uvproj</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\periph\periph_i2cm_interrupt\periph_i2cm_interrupt.uvproj</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\periph\periph_i2cs_interrupt\periph_i2cs_interrupt.uvproj</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\periph\periph_i2cs_interrupt_dma\periph_i2cs_interrupt_dma.uvproj</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\periph\periph_mrt\periph_mrt.uvproj</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\periph\periph_ostimer\periph_ostimer.uvproj</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\periph\periph_pinint\periph_pinint.uvproj</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\periph\periph_rtc\periph_rtc.uvproj</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\periph\periph_sct\periph_sct.uvproj</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\periph\periph_sct_pwm\periph_sct_pwm.uvproj</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\periph\periph_spi_rom\periph_spi_rom.uvproj</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\periph\periph_spi_rom_interrupt\periph_spi_rom_interrupt.uvproj</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\periph\periph_spi_sm_int\periph_spi_sm_int.uvproj</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\periph\periph_uart_rb\periph_uart_rb.uvproj</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\periph\periph_uart_rom_int\periph_uart_rom_int.uvproj</PathAndName>
+    <NodeIsExpanded>1</NodeIsExpanded>
+  </project>
+
+  <project>
+    <PathAndName>.\periph\periph_uart_rom_polling\periph_uart_rom_polling.uvproj</PathAndName>
+    <NodeIsExpanded>1</NodeIsExpanded>
+  </project>
+
+  <project>
+    <PathAndName>.\periph\periph_utick\periph_utick.uvproj</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\periph\periph_wwdt\periph_wwdt.uvproj</PathAndName>
+  </project>
+
+</ProjectWorkspace>

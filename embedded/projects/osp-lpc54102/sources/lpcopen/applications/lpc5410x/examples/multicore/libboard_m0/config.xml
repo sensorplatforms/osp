@@ -1,0 +1,8 @@
+<LPCOpenCfg>
+	<symbol name="varBoardLibName"   value="lpc_board_${prjBoardName}_m0"/>
+	<symbol name="varCPUCore"        value="m0plus"/>
+	<symbol name="varChipPart"       value="${varChipPartM0}"/>
+	<symbol name="varChipLibName"    value="lpc_chip_${prjChipFamily}_m0"/>
+
+	<module name="libboard"/>
+</LPCOpenCfg>

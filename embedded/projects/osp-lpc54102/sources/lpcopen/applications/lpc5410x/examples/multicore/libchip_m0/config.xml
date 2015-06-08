@@ -1,0 +1,15 @@
+<LPCOpenCfg>
+	<symbol name="varCPUCore"        value="m0plus"/>
+	<symbol name="varChipPart"       value="${varChipPartM0}"/>
+	<symbol name="varChipLibName"    value="lpc_chip_${prjChipFamily}_m0"/>
+
+	<module name="libchip"/>
+	<template section="filelist" tool="xpresso">
+		<import src="${varChipLibSrcDir}/../chip_common" dest="inc">
+			<include>fpu_init.h</include>
+		</import>
+		<import src="${varChipLibSrcDir}/../chip_common" dest="src">
+			<include>fpu_init.c</include>
+		</import>
+	</template>
+</LPCOpenCfg>

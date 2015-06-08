@@ -1,0 +1,24 @@
+<LPCOpenCfg>
+	<!-- Symbol section -->
+	<symbol name="varCPUCore" value="m0plus"/>
+	<symbol name="varChipPart"       value="${varChipPartM0}"/>
+	<symbol name="varExampleMemCfgFile" value="lpcxpresso_mem.xml"/>
+	<symbol name="varExampleMemCfgDir" value="${varExampleSrcDir}"/>
+	<symbol name="varChipLibName"     value="lpc_chip_${prjChipFamily}_m0"/>
+	<symbol name="varBoardLibName"    value="lpc_board_${prjBoardName}_m0"/>
+	<symbol name="varExStartupFile"   value="cr_startup_lpc${prjChipFamily}-m0.c"/>
+
+	<!-- Module include section -->
+	<module name="basic_example"/>
+
+	<!-- Template section -->
+	<template section="cfglist" tool="xpresso">
+		<memoryConfiguration href="${varExampleMemCfgDir}/${varExampleMemCfgFile}"/>
+	</template>
+
+	<template section="cfglist" tool="xpresso">
+		<setting id="linker.slave">
+			<value>M0SLAVE</value>
+		</setting>
+	</template>
+</LPCOpenCfg>

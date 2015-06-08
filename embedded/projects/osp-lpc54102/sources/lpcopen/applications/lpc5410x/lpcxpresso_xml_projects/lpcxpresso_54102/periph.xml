@@ -1,0 +1,30 @@
+<workspace xmlns:xi="http://www.w3.org/2001/XInclude">
+	<prjgroup name="libchip">
+		<project description="libchip/libchip/libchip.xml"/>
+	</prjgroup>
+	<prjgroup name="libboard">
+		<project description="libboard/libboard/libboard.xml"/>
+	</prjgroup>
+	<prjgroup name="periph">
+		<project description="periph/blinky/blinky.xml"/>
+		<project description="periph/bod/bod.xml"/>
+		<project description="periph/clkout/clkout.xml"/>
+		<project description="periph/crc/crc.xml"/>
+		<project description="periph/flashiap/flashiap.xml"/>
+		<project description="periph/freqmeasure/freqmeasure.xml"/>
+		<project description="periph/gint/gint.xml"/>
+		<project description="periph/mrt/mrt.xml"/>
+		<project description="periph/pinint/pinint.xml"/>
+		<project description="periph/pllfract/pllfract.xml"/>
+		<project description="periph/ritimer/ritimer.xml"/>
+		<project description="periph/rtc/rtc.xml"/>
+		<project description="periph/rtcut/rtcut.xml"/>
+		<project description="periph/sct/sct.xml"/>
+		<project description="periph/sct_pwm/sct_pwm.xml"/>
+		<project description="periph/timer/timer.xml"/>
+		<project description="periph/utick/utick.xml"/>
+		<project description="periph/wakeup/wakeup.xml"/>
+		<project description="periph/wwdt/wwdt.xml"/>
+	</prjgroup>
+</workspace>
+

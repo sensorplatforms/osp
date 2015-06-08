@@ -1,0 +1,41 @@
+<workspace xmlns:xi="http://www.w3.org/2001/XInclude">
+	<prjgroup name="libchip">
+		<project description="libchip/libchip/libchip.xml"/>
+	</prjgroup>
+	<prjgroup name="libboard">
+		<project description="libboard/libboard/libboard.xml"/>
+	</prjgroup>
+	<prjgroup name="periph">
+		<project description="periph/periph_adc/periph_adc.xml"/>
+		<project description="periph/periph_adc_dma_rom/periph_adc_dma_rom.xml"/>
+		<project description="periph/periph_blinky/periph_blinky.xml"/>
+		<project description="periph/periph_bod/periph_bod.xml"/>
+		<project description="periph/periph_crc/periph_crc.xml"/>
+		<project description="periph/periph_ctimer/periph_ctimer.xml"/>
+		<project description="periph/periph_dma/periph_dma.xml"/>
+		<project description="periph/periph_dma_rom/periph_dma_rom.xml"/>
+		<project description="periph/periph_flashiap/periph_flashiap.xml"/>
+		<project description="periph/periph_freqmeasure/periph_freqmeasure.xml"/>
+		<project description="periph/periph_gint/periph_gint.xml"/>
+		<project description="periph/periph_i2cm_interrupt/periph_i2cm_interrupt.xml"/>
+		<project description="periph/periph_i2cs_interrupt/periph_i2cs_interrupt.xml"/>
+		<project description="periph/periph_i2cs_interrupt_dma/periph_i2cs_interrupt_dma.xml"/>
+		<project description="periph/periph_i2c_rom/periph_i2c_rom.xml"/>
+		<project description="periph/periph_i2c_rom_slave/periph_i2c_rom_slave.xml"/>
+		<project description="periph/periph_mrt/periph_mrt.xml"/>
+		<project description="periph/periph_ostimer/periph_ostimer.xml"/>
+		<project description="periph/periph_pinint/periph_pinint.xml"/>
+		<project description="periph/periph_rtc/periph_rtc.xml"/>
+		<project description="periph/periph_sct/periph_sct.xml"/>
+		<project description="periph/periph_sct_pwm/periph_sct_pwm.xml"/>
+		<project description="periph/periph_spi_rom/periph_spi_rom.xml"/>
+		<project description="periph/periph_spi_rom_interrupt/periph_spi_rom_interrupt.xml"/>
+		<project description="periph/periph_spi_sm_int/periph_spi_sm_int.xml"/>
+		<project description="periph/periph_uart_rb/periph_uart_rb.xml"/>
+		<project description="periph/periph_uart_rom_int/periph_uart_rom_int.xml"/>
+		<project description="periph/periph_uart_rom_polling/periph_uart_rom_polling.xml"/>
+		<project description="periph/periph_utick/periph_utick.xml"/>
+		<project description="periph/periph_wwdt/periph_wwdt.xml"/>
+	</prjgroup>
+</workspace>
+

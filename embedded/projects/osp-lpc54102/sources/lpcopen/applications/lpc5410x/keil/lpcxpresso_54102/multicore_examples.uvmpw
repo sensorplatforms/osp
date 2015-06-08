@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<ProjectWorkspace xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="project_mpw.xsd">
+
+  <SchemaVersion>1.0</SchemaVersion>
+
+  <Header>### uVision Project, (C) Keil Software</Header>
+
+  <WorkspaceName>Multi-core examples</WorkspaceName>
+
+  <project>
+    <PathAndName>..\..\..\..\software\lpc_core\lpc_chip\chip_5410x\lib_chip_5410x.uvprojx</PathAndName>
+    <NodeIsActive>1</NodeIsActive>
+    <NodeIsCheckedInBatchBuild>1</NodeIsCheckedInBatchBuild>
+  </project>
+
+  <project>
+    <PathAndName>..\..\..\..\software\lpc_core\lpc_board\boards_5410x\lpcxpresso_54102\lib_board_lpcxpresso_54102.uvprojx</PathAndName>
+    <NodeIsCheckedInBatchBuild>1</NodeIsCheckedInBatchBuild>
+  </project>
+
+  <project>
+    <PathAndName>..\..\..\..\software\lpc_core\lpc_chip\chip_5410x\lib_chip_5410x_m0.uvprojx</PathAndName>
+    <NodeIsCheckedInBatchBuild>1</NodeIsCheckedInBatchBuild>
+  </project>
+
+  <project>
+    <PathAndName>..\..\..\..\software\lpc_core\lpc_board\boards_5410x\lpcxpresso_54102\lib_board_lpcxpresso_54102_m0.uvprojx</PathAndName>
+    <NodeIsCheckedInBatchBuild>1</NodeIsCheckedInBatchBuild>
+  </project>
+
+  <project>
+    <PathAndName>.\multicore\m4_blinky\m4_blinky.uvprojx</PathAndName>
+    <NodeIsCheckedInBatchBuild>1</NodeIsCheckedInBatchBuild>
+  </project>
+
+  <project>
+    <PathAndName>.\multicore\m0_blinky\m0_blinky.uvprojx</PathAndName>
+    <NodeIsCheckedInBatchBuild>1</NodeIsCheckedInBatchBuild>
+  </project>
+
+</ProjectWorkspace>

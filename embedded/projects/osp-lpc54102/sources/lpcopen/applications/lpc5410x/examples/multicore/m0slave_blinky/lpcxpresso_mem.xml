@@ -1,0 +1,7 @@
+<info flash_driver='LPC5410x_512K.cfx'>
+ <chip>
+  <memory id='Flash' type='Flash' is_ro='true' can_program='true'></memory>
+  <memory id='RAM' type='RAM'></memory>
+   <memoryInstance id='Ram1_32' derived_from='RAM' location='0x2010000' size='0x8000'  />
+ </chip>
+</info>

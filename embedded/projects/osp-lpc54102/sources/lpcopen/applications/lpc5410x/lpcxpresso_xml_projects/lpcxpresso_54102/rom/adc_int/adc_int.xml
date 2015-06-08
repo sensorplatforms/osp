@@ -1,0 +1,82 @@
+<project xmlns:xi="http://www.w3.org/2001/XInclude" type="Basic C project" name="rom_adc_int" chip="LPC54102J512" vendor="NXP">
+	<filelist name="lpcxpresso_54102_rom_adc_int">
+		<import name="lpcxpresso_54102_rom_adc_int_src" src="../../../../../../applications/lpc5410x/examples/rom/adc_int" dest="example/src">
+			<include>*.c</include>
+		</import>
+		<import name="lpcxpresso_54102_rom_adc_int_inc" src="../../../../../../applications/lpc5410x/examples/rom/adc_int" dest="example/src">
+			<include>*.h</include>
+		</import>
+		<import name="lpcxpresso_54102_rom_adc_int_doc" src="../../../../../../applications/lpc5410x/examples/rom/adc_int" dest="example">
+			<include>*.dox</include>
+			<include>*.txt</include>
+		</import>
+		<import name="lpcxpresso_54102_rom_adc_int_sysinit" src="../../../../../../applications/lpc5410x/startup" dest="example/src">
+			<copy>sysinit.c</copy>
+		</import>
+		<import name="lpcxpresso_54102_rom_adc_int_startup" src="../../../../../../applications/lpc5410x/startup" dest="example/src">
+			<copy>cr_startup_lpc5410x.c</copy>
+			<copy>crp.c</copy>
+		</import>
+	</filelist>
+	<cfglist name="lpcxpresso_54102_rom_adc_int">
+		<setting name="lpcxpresso_54102_rom_adc_int_cdef" id="compiler.def">
+			<value>__USE_LPCOPEN</value>
+		</setting>
+		<setting id="assembler.c.header">
+			<value>Redlib</value>
+		</setting>
+		<setting id="compiler.c.header">
+			<value>Redlib</value>
+		</setting>
+		<setting id="linker.library.type">
+			<value>Redlib (nohost)</value>
+		</setting>
+		<setting id="linker.libs">
+			<value>lpc_board_lpcxpresso_54102</value>
+			<value>lpc_chip_5410x</value>
+		</setting>
+		<setting name="lpcxpresso_54102_rom_adc_int_incdir" id="compiler.inc">
+			<value>${workspace_loc:/lpc_chip_5410x/inc}</value>
+			<value>${workspace_loc:/lpc_board_lpcxpresso_54102/inc}</value>
+		</setting>
+		<setting id="linker.paths" buildType="Debug">
+			<value>${workspace_loc:/lpc_chip_5410x/Debug}</value>
+			<value>${workspace_loc:/lpc_board_lpcxpresso_54102/Debug}</value>
+		</setting>
+		<setting id="linker.paths" buildType="Release">
+			<value>${workspace_loc:/lpc_chip_5410x/Release}</value>
+			<value>${workspace_loc:/lpc_board_lpcxpresso_54102/Release}</value>
+		</setting>
+		<requires>
+			<value>lpc_chip_5410x</value>
+			<value>lpc_board_lpcxpresso_54102</value>
+		</requires>
+		<setting id="assembler.fp">
+			<value>com.crt.advproject.gas.fpu.fpv4</value>
+		</setting>
+		<setting id="compiler.c.fp">
+			<value>com.crt.advproject.gcc.fpu.fpv4</value>
+		</setting>
+		<setting id="cpp.compiler.c.fp">
+			<value>com.crt.advproject.cpp.fpu.fpv4</value>
+		</setting>
+		<setting id="all.compiler.flags">
+			<value>-fsingle-precision-constant</value>
+		</setting>
+		<setting id="linker.fp">
+			<value>com.crt.advproject.link.fpu.fpv4</value>
+		</setting>
+		<setting id="compiler.def">
+			<value>CORE_M4</value>
+		</setting>
+		<setting id="linker.crp">
+			<value>true</value>
+		</setting>
+		<setting id="linker.paths">
+			<value>${workspace_loc:/lpc_chip_5410x/libs}</value>
+		</setting>
+		<setting id="linker.libs">
+			<value>power</value>
+		</setting>
+	</cfglist>
+</project>
