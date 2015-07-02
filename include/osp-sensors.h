@@ -1,7 +1,7 @@
 /* Open Sensor Platform Project
  * https://github.com/sensorplatforms/open-sensor-platform
  *
- * Copyright (C) 2013 Sensor Platforms Inc.
+ * Copyright (C) 2015 Audience Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,25 +46,23 @@ typedef enum _PSensorType {
 
     PSENSOR_DEBUG_TUNNEL                   =  PSENSOR_ENUM_FIRST_SENSOR, //!< Debug message pipe to host
     PSENSOR_ACCELEROMETER_RAW              = 1,  //!< raw accelerometer data (direct from sensor)
-    PSENSOR_MAGNETIC_FIELD_RAW             = 2,  //!< magnetometer data (direct from sensor)
-    PSENSOR_GYROSCOPE_RAW                  = 3,  //!< calibrated gyroscope data (direct from sensor)
-    PSENSOR_LIGHT_UV                       = 4,  //!< UV light sensor data (Android Units)
-    PSENSOR_LIGHT_RGB                      = 5,  //!< RGB light sensor data (Android Units)
-//QUOC:  step sensitity detector is no longer support in MotionQ. Should we remove this? 
-    PSENSOR_STEP                           = 6,  //!< step data
-    PSENSOR_ACCELEROMETER_UNCALIBRATED     = 7,  //!< uncalibrated accelerometer data (Android Units)
-// What is the difference between this orientation and Android orientation sensor?
-    PSENSOR_ORIENTATION                    = 8,  //!< yaw, pitch, roll (also use this for Win8 Inclinometer)
-    PSENSOR_CONTEXT_DEVICE_MOTION          = 9,  //!< context of device relative to world frame
-    PSENSOR_CONTEXT_CARRY                  = 10, //!< context of device relative to user
-    PSENSOR_CONTEXT_POSTURE                = 11, //!< context of user relative to world frame
-    PSENSOR_CONTEXT_TRANSPORT              = 12, //!< context of environment relative to world frame
-// Should gesture be part of android sensor ? 
-    PSENSOR_GESTURE_EVENT                  = 13, //!< gesture event such as a double-tap or shake
-    PSENSOR_HEART_RATE                     = 14, //!< heart-rate data
-    SYSTEM_REAL_TIME_CLOCK                 = 15,  //!< Real time clock used for time stamp
-	
-	NUM_PRIVATE_SENSOR_TYPE                        //!< Total number of Private sensor type
+    PSENSOR_MAGNETIC_FIELD_RAW             = 2,  //!< raw magnetometer data (direct from sensor)
+    PSENSOR_GYROSCOPE_RAW                  = 3,  //!< raw gyroscope data (direct from sensor)
+    PSENSOR_MAG_FIELD_ANOMALY              = 4,  //!< Magnetic field anomaly detector
+    PSENSOR_LIGHT_UV                       = 5,  //!< UV light sensor data (Android Units)
+    PSENSOR_LIGHT_RGB                      = 6,  //!< RGB light sensor data (Android Units)
+    PSENSOR_STEP                           = 7,  //!< step data
+    PSENSOR_ACCELEROMETER_UNCALIBRATED     = 8,  //!< uncalibrated accelerometer data (Android Units)
+    PSENSOR_MOTION_SIGNIFICANT_STILLNESS   = 9,  //!< Stillness motion detector
+    PSENSOR_CONTEXT_DEVICE_MOTION          = 10, //!< context of device relative to world frame
+    PSENSOR_CONTEXT_CARRY                  = 11, //!< context of device relative to user
+    PSENSOR_CONTEXT_POSTURE                = 12, //!< context of user relative to world frame
+    PSENSOR_CONTEXT_TRANSPORT              = 13, //!< context of environment relative to world frame
+    PSENSOR_CONTEXT_GESTURE_EVENT          = 14, //!< additional gesture event such as a double-tap or shake
+    PSENSOR_CONTEXT_SEGMENT_DETECTOR       = 15, //!<
+    SYSTEM_REAL_TIME_CLOCK                 = 16, //!< Real time clock used for time stamp
+
+    NUM_PRIVATE_SENSOR_TYPE                      //!< Total number of Private sensor type
 } PSensorType_t;
 
 
@@ -103,6 +101,12 @@ typedef enum _ASensorType {
     SENSOR_STEP_DETECTOR                    = 18,
     SENSOR_STEP_COUNTER                     = 19,
     SENSOR_GEOMAGNETIC_ROTATION_VECTOR      = 20,
+    SENSOR_HEART_RATE                       = 21,
+    SENSOR_WAKE_UP_TILT_DETECTOR            = 22,
+    SENSOR_TILT_DETECTOR                    = 23,
+    SENSOR_WAKE_GESTURE                     = 24,
+    SENSOR_GLANCE_GESTURE                   = 25,
+    SENSOR_PICK_UP_GESTURE                  = 26,
 
     NUM_ANDROID_SENSOR_TYPE,                      //!< Total number of Android sensor type
 
@@ -110,20 +114,21 @@ typedef enum _ASensorType {
     AP_PSENSOR_ACCELEROMETER_RAW            =  M_PSensorToAndroidBase(PSENSOR_ACCELEROMETER_RAW),
     AP_PSENSOR_MAGNETIC_FIELD_RAW           =  M_PSensorToAndroidBase(PSENSOR_MAGNETIC_FIELD_RAW),
     AP_PSENSOR_GYROSCOPE_RAW                =  M_PSensorToAndroidBase(PSENSOR_GYROSCOPE_RAW),
+    AP_PSENSOR_MAG_FIELD_ANOMALY            =  M_PSensorToAndroidBase(PSENSOR_MAG_FIELD_ANOMALY),
     AP_PSENSOR_LIGHT_UV                     =  M_PSensorToAndroidBase(PSENSOR_LIGHT_UV),
     AP_PSENSOR_LIGHT_RGB                    =  M_PSensorToAndroidBase(PSENSOR_LIGHT_RGB),
     AP_PSENSOR_STEP                         =  M_PSensorToAndroidBase(PSENSOR_STEP),
     AP_PSENSOR_ACCELEROMETER_UNCALIBRATED   =  M_PSensorToAndroidBase(PSENSOR_ACCELEROMETER_UNCALIBRATED),
-    AP_PSENSOR_ORIENTATION                  =  M_PSensorToAndroidBase(PSENSOR_ORIENTATION),
+    AP_PSENSOR_MOTION_SIGNIFICANT_STILLNESS =  M_PSensorToAndroidBase(PSENSOR_MOTION_SIGNIFICANT_STILLNESS),
     AP_PSENSOR_CONTEXT_DEVICE_MOTION        =  M_PSensorToAndroidBase(PSENSOR_CONTEXT_DEVICE_MOTION),
     AP_PSENSOR_CONTEXT_CARRY                =  M_PSensorToAndroidBase(PSENSOR_CONTEXT_CARRY),
     AP_PSENSOR_CONTEXT_POSTURE              =  M_PSensorToAndroidBase(PSENSOR_CONTEXT_POSTURE),
     AP_PSENSOR_CONTEXT_TRANSPORT            =  M_PSensorToAndroidBase(PSENSOR_CONTEXT_TRANSPORT),
-    AP_PSENSOR_GESTURE_EVENT                =  M_PSensorToAndroidBase(PSENSOR_GESTURE_EVENT),
-    AP_PSENSOR_HEART_RATE                   =  M_PSensorToAndroidBase(PSENSOR_HEART_RATE),
+    AP_PSENSOR_CONTEXT_GESTURE_EVENT        =  M_PSensorToAndroidBase(PSENSOR_CONTEXT_GESTURE_EVENT),
+    AP_PSENSOR_CONTEXT_SEGMENT_DETECTOR     =  M_PSensorToAndroidBase(PSENSOR_CONTEXT_SEGMENT_DETECTOR),
     AP_SYSTEM_REAL_TIME_CLOCK               =  M_PSensorToAndroidBase(SYSTEM_REAL_TIME_CLOCK),
-	
-} ASensorType_t; 
+
+} ASensorType_t;
 
 
 
@@ -140,31 +145,37 @@ typedef enum _SensorParamId {
     NUM_SENSOR_PARAM
 } SensorParamId_t;
 
-#if (1) 
-// QUOC comment: Define the enumeration for the physical input sensors. This is different than 
-// the sensor type in ASensorType_t which is used solely for subscribes sensor output data.
-//
+
+/* Enumeration for the input sensors. */
 typedef enum _InputSensor
 {
     ACCEL_INPUT_SENSOR,
     MAG_INPUT_SENSOR,
     GYRO_INPUT_SENSOR,
-	LIGHT_INPUT_SENSOR,
+    LIGHT_INPUT_SENSOR,
     PRESSURE_INPUT_SENSOR,
-	TEMPERATURE_INPUT_SENSOR,
-	PROXIMITY_INPUT_SENSOR,
-	RELATIVE_HUMIDITY_INPUT_SENSOR,
-	AMBIENT_TEMPERATURE_INPUT_SENSOR,
-	
+    TEMPERATURE_INPUT_SENSOR,
+    PROXIMITY_INPUT_SENSOR,
+    RELATIVE_HUMIDITY_INPUT_SENSOR,
+    AMBIENT_TEMPERATURE_INPUT_SENSOR,
+
     NUM_INPUT_SENSORS,
     UNKNOWN_INPUT_SENSOR = 0xFF
 } InputSensor_t;
-#endif 
 
+// TODO:  Need more description how these are use.
+//! Segment detector subtypes
+typedef enum _SegmentSubType{
+    CONTEXT_CHANGE_DETECT,
+    CONTEXT_STEP_SEGMENT_DETECT,
+    CONTEXT_TILT_DETECT,
+
+    NUM_PSENSOR_CONTEXT_SEGMENT_DETECTOR_SUBTYPE
+} SegmentSubType_t;
 
 //!  Use these values as a sub-type for  STEP result
 typedef enum _StepSubType {
-    CONTEXT_STEP  = SENSOR_SUBTYPE_START,  //!< only one kind of step now
+    CONTEXT_STEP  = SENSOR_SUBTYPE_START,  //! Please proper description for this subtype
     STEP_SEGMENT_DETECTOR,                 //!< low compute trigger for analyzing if step may have occured
 
     NUM_PSENSOR_STEP_SUBTYPE
@@ -177,9 +188,6 @@ typedef enum _ContextDeviceMotionSubType {
     CONTEXT_DEVICE_MOTION_ROTATING,
     CONTEXT_DEIVCE_MOTION_TRANSLATING,
     CONTEXT_DEVICE_MOTION_FREE_FALLING,
-    CONTEXT_DEVICE_MOTION_SIGNIFICANT_MOTION,        //!< significant motion (as specified by Android HAL 1.0)
-    CONTEXT_DEVICE_MOTION_SIGNIFICANT_STILLNESS,     //!< complement to significant motion
-    CONTEXT_DEVICE_MOTION_CHANGE_DETECTOR,           //!< low compute trigger for seeing if context may have changed
 
     NUM_PSENSOR_CONTEXT_DEVICE_MOTION_SUBTYPE
 } ContextDeviceMotionSubType_t;
@@ -230,19 +238,6 @@ typedef enum _GestureSubType {
     NUM_PSENSOR_GESTURE_SUBTYPE
 } GestureSubType_t;
 
-//! Time Stamp definition for capturing raw time counts
-typedef union _TimeStamp {
-    uint64_t TS64;
-    uint32_t TS32[2];
-    uint8_t  TS8[8];
-} TimeStamp_t;
-
-//! Generic structure definition for a 3-axis sensor raw values in 2's complement format
-typedef struct TriAxisRawData_t
-{
-    TimeStamp_t  TStamp;
-    int32_t      Axis[3];
-} TriAxisRawData_t;
 
 /*-------------------------------------------------------------------------------------------------*\
  |    E X T E R N A L   V A R I A B L E S   &   F U N C T I O N S

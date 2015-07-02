@@ -1,7 +1,7 @@
 /* Open Sensor Platform Project
  * https://github.com/sensorplatforms/open-sensor-platform
  *
- * Copyright (C) 2013 Sensor Platforms Inc.
+ * Copyright (C) 2015 Sensor Platforms Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,34 +66,34 @@ static void SensorDataHandler(InputSensor_t sensorId, uint32_t timeStamp);
  *********************************************************************/
 static void HandleTimers(MsgTimerExpiry *pTimerExp)
 {
-	uint32_t timeStamp;
+    uint32_t timeStamp;
 
-	switch (pTimerExp->userValue) {
-	case TIMER_REF_PRESSURE_READ:
-		/* Schedule the next sampling */
-		ASFTimerStart(SENSOR_ACQ_TASK_ID, TIMER_REF_PRESSURE_READ,
-				PRESSURE_SAMPLE_PERIOD, &sPressureTimer);
+    switch (pTimerExp->userValue) {
+    case TIMER_REF_PRESSURE_READ:
+        /* Schedule the next sampling */
+        ASFTimerStart(SENSOR_ACQ_TASK_ID, TIMER_REF_PRESSURE_READ,
+                PRESSURE_SAMPLE_PERIOD, &sPressureTimer);
 
-		timeStamp = GetCurrentTime();
-		SensorDataHandler(PRESSURE_INPUT_SENSOR, timeStamp);
-		break;
+        timeStamp = GetCurrentTime();
+        SensorDataHandler(PRESSURE_INPUT_SENSOR, timeStamp);
+        break;
 #ifndef INTERRUPT_BASED_SAMPLING
-	case TIMER_REF_SENSOR_READ:
-		/* Schedule the next sampling */
-		ASFTimerStart(SENSOR_ACQ_TASK_ID, TIMER_REF_SENSOR_READ,
-				SENSOR_SAMPLE_PERIOD, &sSensorTimer);
+    case TIMER_REF_SENSOR_READ:
+        /* Schedule the next sampling */
+        ASFTimerStart(SENSOR_ACQ_TASK_ID, TIMER_REF_SENSOR_READ,
+                SENSOR_SAMPLE_PERIOD, &sSensorTimer);
 
-		/* Call data handler for each sensors */
-		timeStamp = RTC_GetCounter();
-		SensorDataHandler(ACCEL_INPUT_SENSOR, timeStamp);
-		SensorDataHandler(MAG_INPUT_SENSOR, timeStamp);
-		SensorDataHandler(GYRO_INPUT_SENSOR, timeStamp);
-		break;
+        /* Call data handler for each sensors */
+        timeStamp = RTC_GetCounter();
+        SensorDataHandler(ACCEL_INPUT_SENSOR, timeStamp);
+        SensorDataHandler(MAG_INPUT_SENSOR, timeStamp);
+        SensorDataHandler(GYRO_INPUT_SENSOR, timeStamp);
+        break;
 #endif
-	default:
-		D1_printf("Unknown Timer! Reference %d\r\n", pTimerExp->userValue);
-		break;
-	}
+    default:
+        D1_printf("Unknown Timer! Reference %d\r\n", pTimerExp->userValue);
+        break;
+    }
 }
 
 #ifdef ENABLE_FLASH_STORE
@@ -118,141 +118,144 @@ static uint32_t queue_err = 0;
 
 static void SensorDataHandler(InputSensor_t sensorId, uint32_t timeStamp)
 {
-	MsgAccelData accelData;
-	MsgMagData magData;
-	MsgGyroData gyroData;
-	MsgPressData pressData;
-	static uint8_t sMagDecimateCount = 0;
-	static uint8_t gyroSampleCount = 0;
-	static uint8_t accSampleCount = 0;
+    MsgAccelData accelData;
+    MsgMagData magData;
+    MsgGyroData gyroData;
+    MsgPressData pressData;
+    static uint8_t sMagDecimateCount = 0;
+    static uint8_t gyroSampleCount = 0;
+    static uint8_t accSampleCount = 0;
 
 #if defined ALGORITHM_TASK
-	MessageBuffer *pMagSample = NULLP;
-	MessageBuffer *pAccSample = NULLP;
-	MessageBuffer *pGyroSample = NULLP;
-	MessageBuffer *pPressSample = NULLP;
+    MessageBuffer *pMagSample = NULLP;
+    MessageBuffer *pAccSample = NULLP;
+    MessageBuffer *pGyroSample = NULLP;
+    MessageBuffer *pPressSample = NULLP;
 #endif
 
-	switch (sensorId) {
-	case MAG_INPUT_SENSOR:
-		/* Read mag Data - reading would clear interrupt also */
-		Mag_ReadData(&magData);           
-       
-		if ((sMagDecimateCount++ % MAG_DECIMATE_FACTOR) == 0) {
-			/* Replace time stamp with that captured
-			   by interrupt handler */
-			magData.timeStamp = timeStamp;           
+    switch (sensorId) {
+    case MAG_INPUT_SENSOR:
+        /* Read mag Data - reading would clear interrupt also */
+        Mag_ReadData(&magData);
+
+        if ((sMagDecimateCount++ % MAG_DECIMATE_FACTOR) == 0) {
+            /* Replace time stamp with that captured
+               by interrupt handler */
+            magData.timeStamp = timeStamp;
 #ifdef ALGORITHM_TASK
-			ASF_assert(ASFCreateMessage(MSG_MAG_DATA, 
-					sizeof(MsgMagData),
-					&pMagSample) == ASF_OK);
-			pMagSample->msg.msgMagData = magData;
-			if (!(ASFSendMessage(ALGORITHM_TASK_ID,
-					pMagSample) == ASF_OK)) {
-				queue_err++;
-			}
-#endif                     
-		}
-		break;
+            ASF_assert(ASFCreateMessage(MSG_MAG_DATA,
+                    sizeof(MsgMagData),
+                    &pMagSample) == ASF_OK);
+            pMagSample->msg.msgMagData = magData;
+            if (!(ASFSendMessage(ALGORITHM_TASK_ID,
+                    pMagSample) == ASF_OK)) {
+                queue_err++;
+            }
+#endif
+        }
+        //D0_printf("Mag ADC: %d, %d, %d\r\n", magData.X, magData.Y, magData.Z);
+        break;
 
-	case GYRO_INPUT_SENSOR:
-		Gyro_ReadData(&gyroData); //Reads also clears DRDY interrupt
+    case GYRO_INPUT_SENSOR:
+        Gyro_ReadData(&gyroData); //Reads also clears DRDY interrupt
 
-		/* Replace time stamp with that captured by interrupt handler */
-    
-		if ((gyroSampleCount++ % GYRO_SAMPLE_DECIMATE) == 0) {
-			/* Read Gyro Data - reading typically clears interrupt as well */
-			gyroData.timeStamp = timeStamp;
+        /* Replace time stamp with that captured by interrupt handler */
+
+        if ((gyroSampleCount++ % GYRO_SAMPLE_DECIMATE) == 0) {
+            /* Read Gyro Data - reading typically clears interrupt as well */
+            gyroData.timeStamp = timeStamp;
 
 #ifdef ALGORITHM_TASK
-			if (ASFCreateMessage(MSG_GYRO_DATA, 
-					sizeof(MsgGyroData),
-					&pGyroSample) == ASF_OK) {
-				pGyroSample->msg.msgGyroData = gyroData;
-				if (!(ASFSendMessage(ALGORITHM_TASK_ID, 
-					pGyroSample) == ASF_OK)) {
-					queue_err++;
-				}
-			}
-#endif                     
-          //  D0_printf("Gyro ADC: %d, %d, %d\r\n", gyroData.X, gyroData.Y, gyroData.Z);                    
-		}
-		break;
-	case ACCEL_INPUT_SENSOR:
+            if (ASFCreateMessage(MSG_GYRO_DATA,
+                    sizeof(MsgGyroData),
+                    &pGyroSample) == ASF_OK) {
+                pGyroSample->msg.msgGyroData = gyroData;
+                if (!(ASFSendMessage(ALGORITHM_TASK_ID,
+                    pGyroSample) == ASF_OK)) {
+                    queue_err++;
+                }
+            }
+#endif
+           // D0_printf("Gyro ADC: %d, %d, %d\r\n", gyroData.X, gyroData.Y, gyroData.Z);
+        }
+        break;
+    case ACCEL_INPUT_SENSOR:
 #if defined TRIGGERED_MAG_SAMPLING
-		if (accSampleCount % MAG_TRIGGER_RATE_DECIMATE == 0) {
-			Mag_TriggerDataAcq(); //Mag is triggered relative to Accel to avoid running separate timer
-		}
-#endif   
+        if (accSampleCount % MAG_TRIGGER_RATE_DECIMATE == 0) {
+            Mag_TriggerDataAcq(); //Mag is triggered relative to Accel to avoid running separate timer
+        }
+#endif
 
-		/* Read Accel Data - reading typically clears interrupt as well */
-		Accel_ReadData(&accelData);
+        /* Read Accel Data - reading typically clears interrupt as well */
+        Accel_ReadData(&accelData);
 
-		if (accSampleCount++ % ACCEL_SAMPLE_DECIMATE == 0) {
-			/* Replace time stamp with that captured by interrupt handler */
-			accelData.timeStamp = timeStamp;
+        if (accSampleCount++ % ACCEL_SAMPLE_DECIMATE == 0) {
+            /* Replace time stamp with that captured by interrupt handler */
+            accelData.timeStamp = timeStamp;
 
 #ifdef ALGORITHM_TASK
-			if (ASFCreateMessage(MSG_ACC_DATA, sizeof(MsgAccelData),
+            if (ASFCreateMessage(MSG_ACC_DATA, sizeof(MsgAccelData),
                                &pAccSample) == ASF_OK) {
-				pAccSample->msg.msgAccelData = accelData;
-				if (!(ASFSendMessage(ALGORITHM_TASK_ID,
-					pAccSample) == ASF_OK)) {
-					queue_err++;
-				}
-			}                                        
+                pAccSample->msg.msgAccelData = accelData;
+                if (!(ASFSendMessage(ALGORITHM_TASK_ID,
+                    pAccSample) == ASF_OK)) {
+                    queue_err++;
+                }
+            }
 #endif
-            // D0_printf("Accel ADC: %d, %d, %d\r\n", accelData.X, accelData.Y, accelData.Z); 
-		}
-		break;
-	case PRESSURE_INPUT_SENSOR:
-		/* Read Accel Data - reading typically clears interrupt as well */
-		Pressure_ReadData(&pressData);
+            // D0_printf("Accel ADC: %d, %d, %d\r\n", accelData.X, accelData.Y, accelData.Z);
+        }
+        break;
+    case PRESSURE_INPUT_SENSOR:
+        /* Read Accel Data - reading typically clears interrupt as well */
+        Pressure_ReadData(&pressData);
 
-		/* Replace time stamp with that captured by interrupt handler */
-		pressData.timeStamp = timeStamp;
-    
-		/* To do: Send the pressure sensor out */
+        /* Replace time stamp with that captured by interrupt handler */
+        pressData.timeStamp = timeStamp;
+
+        /* To do: Send the pressure sensor out */
 #ifdef ALGORITHM_TASK
-		ASF_assert(ASFCreateMessage(MSG_PRESS_DATA,
-				sizeof(MsgPressData),
-				&pPressSample) == ASF_OK);
-		pPressSample->msg.msgPressData = pressData;
-		ASFSendMessage(ALGORITHM_TASK_ID, pPressSample);
+        ASF_assert(ASFCreateMessage(MSG_PRESS_DATA,
+                sizeof(MsgPressData),
+                &pPressSample) == ASF_OK);
+        pPressSample->msg.msgPressData = pressData;
+        ASFSendMessage(ALGORITHM_TASK_ID, pPressSample);
 #endif
-          
-       // D0_printf("Pressure ADC: P = %d,  T = %d\r\n", pressData.X, pressData.Z);                
-		break;
-	default:
-		D0_printf("Input Sensor ID %d is not supported\r\n", sensorId);
-		break;
-	}
+
+       // D0_printf("Pressure ADC: P = %d,  T = %d\r\n", pressData.X, pressData.Z);
+        break;
+    default:
+        D0_printf("Input Sensor ID %d is not supported\r\n", sensorId);
+        break;
+    }
 }
 
 // Uncomment this to enable libfm to turn on/off sensor based on resource usage
-//#define SENSOR_CONTROL_ENABLE  
+//#define SENSOR_CONTROL_ENABLE
 
 /***********************************************************************
  * @fn      SensorControlCmdHandler
- *          Handle sensor parameter setting request 
+ *          Handle sensor parameter setting request
  *
  ***********************************************************************/
 void SensorControlCmdHandler(MsgSensorControlData *pData)
 {
-	InputSensor_t sensorIdx;
-    SensorControlCommand_t command; 
-	sensorIdx = pData->sensorIdx;
+    InputSensor_t sensorType;
+    SensorControlCommand_t command;
+    sensorType = pData->sensorType;
 
     command = (SensorControlCommand_t) pData->command;
-	switch(command){
-	case SENSOR_CONTROL_SENSOR_OFF:		
-		// e.g. put sensor into power saving mode 
-		D0_printf("Sensor Control set sensor idx %d OFF\r\n", sensorIdx);
-        switch ( sensorIdx){
+    switch(command){
+    case SENSOR_CONTROL_SENSOR_OFF:
+        // e.g. put sensor into power saving mode
+        D0_printf("Sensor Control set sensor idx %d OFF\r\n", sensorType);
+        switch ( sensorType){
         case ACCEL_INPUT_SENSOR:
 #ifdef SENSOR_CONTROL_ENABLE
-            Accel_ConfigDataInt(false);         // do not disable accel so watch window input will work 
-#endif 
+            // Maybe add a user configurable 'powerMode' setting and here we
+            // configure the sensor hardware according to its value.
+            Accel_ConfigDataInt(false);         // do not disable accel so watch window input will work
+#endif
             break;
         case MAG_INPUT_SENSOR:
 #ifdef SENSOR_CONTROL_ENABLE
@@ -261,52 +264,57 @@ void SensorControlCmdHandler(MsgSensorControlData *pData)
             break;
        case  GYRO_INPUT_SENSOR:
 #ifdef SENSOR_CONTROL_ENABLE
-          Gyro_ConfigDataInt(false);
-#endif 
+            Gyro_ConfigDataInt(false);
+#endif
+            break;
+        default:
             break;
         }
-		break;
-	case SENSOR_CONTROL_SENSOR_SLEEP:
-		// put sensor into sleep mode 
-		D0_printf("Sensor Control set sensor idx %d to SLEEP mode\r\n", sensorIdx);
-		break;
-	case SENSOR_CONTROL_SENSOR_ON:
-		// Turn sensor into normal operating mode
-		D0_printf("Sensor Control set sensor idx %d ON\r\n", sensorIdx);
-        switch ( sensorIdx){
+        break;
+
+    case SENSOR_CONTROL_SENSOR_SLEEP:
+        // put sensor into sleep mode
+        D0_printf("Sensor Control set sensor idx %d to SLEEP mode\r\n", sensorType);
+        break;
+    case SENSOR_CONTROL_SENSOR_ON:
+        // Turn sensor into normal operating mode
+        D0_printf("Sensor Control set sensor idx %d ON\r\n", sensorType);
+        switch ( sensorType){
         case ACCEL_INPUT_SENSOR:
 #ifdef SENSOR_CONTROL_ENABLE
             Accel_ConfigDataInt(true);
-#endif 
+#endif
             break;
         case MAG_INPUT_SENSOR:
 #ifdef SENSOR_CONTROL_ENABLE
             Mag_ConfigDataInt(true);
-#endif 
+#endif
             break;
        case  GYRO_INPUT_SENSOR:
-#ifdef SENSOR_CONTROL_ENABLE            
+#ifdef SENSOR_CONTROL_ENABLE
             Gyro_ConfigDataInt(true);
 #endif
             break;
+        default:
+            break;
         }
-		break;
-	case SENSOR_CONTROL_SET_SAMPLE_RATE:
-		// Update the sensor output rate 
-		D0_printf("Sensor Control set sensor idx %d sampe rate to %d\r\n", 
-				  sensorIdx, pData->data);
-		break;
-	case SENSOR_CONTROL_SET_LPF_FREQ:
-		D0_printf("Sensor Control set sensor idx %d LPF to %d\r\n",
-				  sensorIdx, pData->data);
-		break;
-	case SENSOR_CONTROL_SET_HPF_FREQ:
-		D0_printf("Sensor Control set sensor idx %d HPF to %d\r\n",
-				  sensorIdx, pData->data);		
-		break;
-	default:
-		D0_printf("Invalid sensor control command value (%d)\r\n", pData->command);
-	}
+        break;
+    case SENSOR_CONTROL_SET_SAMPLE_RATE:
+        // Update the sensor output rate
+        D0_printf("Sensor Control set sensor idx %d sampe rate to %d\r\n",
+                  sensorType, pData->data);
+        break;
+    case SENSOR_CONTROL_SET_LPF_FREQ:
+        D0_printf("Sensor Control set sensor idx %d LPF to %d\r\n",
+                  sensorType, pData->data);
+        break;
+    case SENSOR_CONTROL_SET_HPF_FREQ:
+        D0_printf("Sensor Control set sensor idx %d HPF to %d\r\n",
+                  sensorType, pData->data);
+        break;
+    default:
+        D0_printf("Invalid sensor control command value (%d)\r\n", pData->command);
+    }
 }
 
 /*-------------------------------------------------------------------*\
@@ -324,15 +332,15 @@ void SensorControlCmdHandler(MsgSensorControlData *pData)
  *********************************************************************/
 void SendDataReadyIndication(uint8_t sensorId, uint32_t timeStamp)
 {
-	MessageBuffer *pSendMsg = NULLP;
-	if (ASFCreateMessage(MSG_SENSOR_DATA_RDY,
-			sizeof(MsgSensorDataRdy), &pSendMsg) == ASF_OK) {
-		pSendMsg->msg.msgSensorDataRdy.sensorId = sensorId;
-		pSendMsg->msg.msgSensorDataRdy.timeStamp = timeStamp;
-        
+    MessageBuffer *pSendMsg = NULLP;
+    if (ASFCreateMessage(MSG_SENSOR_DATA_RDY,
+            sizeof(MsgSensorDataRdy), &pSendMsg) == ASF_OK) {
+        pSendMsg->msg.msgSensorDataRdy.sensorId = sensorId;
+        pSendMsg->msg.msgSensorDataRdy.timeStamp = timeStamp;
+
         if ( ASFSendMessage(SENSOR_ACQ_TASK_ID, pSendMsg) != ASF_OK ) {
-            D0_printf("Error sending sensoracq message for senosr id %d\r\n", sensorId);           
-        }        
+            D0_printf("Error sending sensoracq message for senosr id %d\r\n", sensorId);
+        }
     } else {
         D0_printf("Error creating sensoracq message for sensor id %d\r\n", sensorId);
     }
@@ -353,96 +361,96 @@ void SendDataReadyIndication(uint8_t sensorId, uint32_t timeStamp)
  * 1. Sensor interrupts on data ready.
  * 2. IRQ handler is solely expected to call SendDataReadyIndication.
  * 3. SensorAcqTask will see a message data is available.
- * 4. Data is read. Sensor driver is expected to clear 
+ * 4. Data is read. Sensor driver is expected to clear
  *    the interrupt from the read function.
  */
 ASF_TASK void SensorAcqTask(ASF_TASK_ARG)
 {
-	MessageBuffer *rcvMsg = NULLP;
-	volatile uint8_t  i;
+    MessageBuffer *rcvMsg = NULLP;
+    volatile uint8_t  i;
 
 #ifndef WAIT_FOR_HOST_SYNC
-	os_dly_wait(MSEC_TO_TICS(50)); /* Allow startup time for sensors */
+    os_dly_wait(MSEC_TO_TICS(50)); /* Allow startup time for sensors */
 #else
-	WaitForHostSync(); //This also allows for startup time for sensors
+    WaitForHostSync(); //This also allows for startup time for sensors
 #endif
-	/* Setup I2C bus here? */
-	dev_i2c_init();
+    /* Setup I2C bus here? */
+    dev_i2c_init();
 
-	/* Setup interface for the Magnetometer */
-	Mag_HardwareSetup(true);
-	Mag_Initialize();
+    /* Setup interface for the Magnetometer */
+    Mag_HardwareSetup(true);
+    Mag_Initialize();
 
-	/* Setup interface for the accelerometers */
-	Accel_HardwareSetup(true);
-	Accel_Initialize(INIT_NORMAL);     
+    /* Setup interface for the accelerometers */
+    Accel_HardwareSetup(true);
+    Accel_Initialize(INIT_NORMAL);
 
-	/* Setup Gyro */
-	Gyro_HardwareSetup(true);
-	Gyro_Initialize();
+    /* Setup Gyro */
+    Gyro_HardwareSetup(true);
+    Gyro_Initialize();
     D0_printf("Gyro init done:\r\n");
 
 
-	/* Setup Pressure */
-	Pressure_HardwareSetup(true);
-	Pressure_Initialize();
-	ASFTimerStart(SENSOR_ACQ_TASK_ID, TIMER_REF_PRESSURE_READ,
-			PRESSURE_SAMPLE_PERIOD, &sPressureTimer);
+    /* Setup Pressure */
+    Pressure_HardwareSetup(true);
+    Pressure_Initialize();
+    ASFTimerStart(SENSOR_ACQ_TASK_ID, TIMER_REF_PRESSURE_READ,
+            PRESSURE_SAMPLE_PERIOD, &sPressureTimer);
 
 #ifndef INTERRUPT_BASED_SAMPLING
-	/* Start sample period timer */
-	ASFTimerStart(SENSOR_ACQ_TASK_ID, TIMER_REF_SENSOR_READ,
-			SENSOR_SAMPLE_PERIOD, &sSensorTimer);
+    /* Start sample period timer */
+    ASFTimerStart(SENSOR_ACQ_TASK_ID, TIMER_REF_SENSOR_READ,
+            SENSOR_SAMPLE_PERIOD, &sSensorTimer);
 #else
-	/* Enable Sensor interrupts */
-	Mag_ConfigDataInt(true);
-	Accel_ConfigDataInt(true);    
-	Gyro_ConfigDataInt(true);
+    /* Enable Sensor interrupts */
+    Mag_ConfigDataInt(true);
+    Accel_ConfigDataInt(true);
+    Gyro_ConfigDataInt(true);
 
     # ifdef TRIGGERED_MAG_SAMPLING
         D0_printf("Set mag to low power mode\r\n");
         Mag_SetLowPowerMode(); //Low power mode until triggered
     # endif
 #endif
-	
-    D0_printf("%s initialized\r\n", __func__);  
+
+    D0_printf("%s initialized\r\n", __func__);
 
     /* Magnetometer sensor does not re-generate interrupt if its outputs are not read. */
     Mag_ClearDataInt();
 
-	while (1) {		
-		ASFReceiveMessage(SENSOR_ACQ_TASK_ID, &rcvMsg);               
+    while (1) {
+        ASFReceiveMessage(SENSOR_ACQ_TASK_ID, &rcvMsg);
       //  D0_printf("rcvMsg->msgId = %d\r\n",rcvMsg->msgId);
- 
-		switch (rcvMsg->msgId) {
-		case MSG_TIMER_EXPIRY:
-			HandleTimers(&rcvMsg->msg.msgTimerExpiry);
-			break;
-		case MSG_CAL_EVT_NOTIFY:
+
+        switch (rcvMsg->msgId) {
+        case MSG_TIMER_EXPIRY:
+            HandleTimers(&rcvMsg->msg.msgTimerExpiry);
+            break;
+        case MSG_CAL_EVT_NOTIFY:
 #ifdef ENABLE_FLASH_STORE
-			StoreCalibrationData((CalEvent_t)rcvMsg->msg.msgCalEvtNotify.byte);
+            StoreCalibrationData((CalEvent_t)rcvMsg->msg.msgCalEvtNotify.byte);
 #else
-			D0_printf("#### WARNING - NV Storage Not Implemented! #####\r\n");
+            D0_printf("#### WARNING - NV Storage Not Implemented! #####\r\n");
 #endif
-			break;
-		case MSG_SENSOR_DATA_RDY:
-            //D0_printf("MSG_SENSOR_DATA_RDY msg id %d\r\n", rcvMsg->msgId); 
-          
+            break;
+        case MSG_SENSOR_DATA_RDY:
+            //D0_printf("MSG_SENSOR_DATA_RDY msg id %d\r\n", rcvMsg->msgId);
+
 #ifdef INTERRUPT_BASED_SAMPLING
-			SensorDataHandler((InputSensor_t)rcvMsg->msg.msgSensorDataRdy.sensorId,
-					rcvMsg->msg.msgSensorDataRdy.timeStamp);
+            SensorDataHandler((InputSensor_t)rcvMsg->msg.msgSensorDataRdy.sensorId,
+                    rcvMsg->msg.msgSensorDataRdy.timeStamp);
 #endif
-			break;
-		case MSG_SENSOR_CONTROL: 
+            break;
+        case MSG_SENSOR_CONTROL:
             //D0_printf("MSG_SENSOR_CONTROL msg id %d\r\n",rcvMsg->msgId);
-			SensorControlCmdHandler(&rcvMsg->msg.msgSensorControlData);
-			break;
-		default:
-			/* Unhandled messages */
-			D2_printf("SensorAcqTask:!!!UNHANDLED MESSAGE:%d!!!\r\n", rcvMsg->msgId);
-			break;
-		}
-	}
+            SensorControlCmdHandler(&rcvMsg->msg.msgSensorControlData);
+            break;
+        default:
+            /* Unhandled messages */
+            D2_printf("SensorAcqTask:!!!UNHANDLED MESSAGE:%d!!!\r\n", rcvMsg->msgId);
+            break;
+        }
+    }
 }
 
 /*----------------------------------------------------------------------*\

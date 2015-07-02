@@ -46,25 +46,6 @@ typedef signed char OSP_STATUS_t;
 
 /* Error codes (corresponding to osp_status_t) */
 
-#if (0)    // This is the current list defined in OSP-0.9
-#define OSP_STATUS_OK                    0
-#define OSP_STATUS_IDLE                  1
-#define OSP_STATUS_ERROR                -1
-#define OSP_STATUS_DESCRIPTOR_INVALID   -2
-#define OSP_STATUS_ALREADY_REGISTERED   -3
-#define OSP_STATUS_NO_MORE_HANDLES      -4
-#define OSP_STATUS_NULL_POINTER         -5
-#define OSP_STATUS_CAL_NOT_VALID        -6
-#define OSP_STATUS_NOT_REGISTERED       -7
-#define OSP_STATUS_ALREADY_SUBSCRIBED   -8
-#define OSP_STATUS_UNKNOWN_REQUEST      -9
-#define OSP_STATUS_INVALID_HANDLE       -10
-#define OSP_STATUS_NOT_SUBSCRIBED       -11
-#define OSP_STATUS_QUEUE_FULL           -12
-#define OSP_STATUS_NOT_IMPLEMENTED      -13
-#define OSP_STATUS_UNKNOWN_INPUT        -14
-
-#else     // This is what is used in FM embedded 
 #define OSP_STATUS_IDLE                           ((OSP_STATUS_t)  1)
 #define OSP_STATUS_OK                             ((OSP_STATUS_t)  0)
 #define OSP_STATUS_UNSPECIFIED_ERROR              ((OSP_STATUS_t) -1)
@@ -90,7 +71,7 @@ typedef signed char OSP_STATUS_t;
 #define OSP_STATUS_INVALID_HANDLE                 ((OSP_STATUS_t) -21)
 #define OSP_STATUS_SYSTEM_INVALID_DESCRIPTOR      ((OSP_STATUS_t) -22)
 #define OSP_STATUS_SENSOR_UNSUPPORTED             ((OSP_STATUS_t) -23)   
-#endif
+
 
 /*-------------------------------------------------------------------------------------------------*\
  |    T Y P E   D E F I N I T I O N S

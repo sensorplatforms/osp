@@ -155,10 +155,22 @@
 /*-------------------------------------------------------------------------------------------------*\
  |    T Y P E   D E F I N I T I O N S
 \*-------------------------------------------------------------------------------------------------*/
+//! Time Stamp definition for capturing raw time counts
+typedef union _TimeStamp {
+    uint64_t TS64;
+    uint32_t TS32[2];
+    uint8_t  TS8[8];
+} TimeStamp_t;
+
 /* Definition for quaternion data packets for internal usage */
 typedef struct _QuaternionFixP {
     TimeStamp_t TimeStamp;
     int32_t     Quat[4]; //W,X,Y,Z order
+#if 0    
+    // Add these two fields to comply with Android spec. 
+    int32_t     HeadingError;
+    int32_t     TiltError;
+#endif 
 } QuaternionFixP_t;
 
 typedef struct _UncalibratedFixP {
@@ -171,6 +183,12 @@ typedef struct _CalibratedFixP {
     TimeStamp_t TimeStamp;
     int32_t     Axis[3]; //X,Y,Z,
 } CalibratedFixP_t;
+
+// Possible combine this and the CalibratedFixP_t into a common data type. 
+typedef struct _TriAxisRawData {
+    TimeStamp_t TStamp;
+    int32_t     Axis[3]; //X,Y,Z,
+} TriAxisRawData_t;
 
 /* Union of the structures that can be parsed out of Sensor Data packet */
 typedef struct _SensorPacketTypes {

@@ -21,7 +21,7 @@
 /*-------------------------------------------------------------------------------------------------*\
  |    I N C L U D E   F I L E S
 \*-------------------------------------------------------------------------------------------------*/
-
+#include <stdint.h>
 /*-------------------------------------------------------------------------------------------------*\
  |    C O N S T A N T S   &   M A C R O S
 \*-------------------------------------------------------------------------------------------------*/
@@ -38,7 +38,9 @@ typedef struct MsgSensorDataTag
     int32_t     X;	/* Pitch */
     int32_t     Y;	/* Roll */
     int32_t     Z;	/* Yaw */
-    int32_t	W;
+    int32_t	    W;
+    int32_t     HeadingError;
+    int32_t     TiltError;
 } MsgSensorData;
 
 typedef struct MsgSensorBoolTag 
@@ -62,9 +64,9 @@ typedef MsgSensorBoolData MsgStepDetData;
 typedef struct MsgInclinationDataTag
 {
     uint32_t    timeStamp;
-    int32_t     pitch;
-    int32_t     roll;
     int32_t     yaw;
+    int32_t     pitch;
+    int32_t     roll;   
 }  MsgInclinationData;
 
 typedef struct MsgSensorDataRdyTag
@@ -85,7 +87,7 @@ typedef struct MsgSensorControlDataTag
 {
     uint32_t command;
     int32_t  data;
-    uint8_t  sensorIdx;
+    uint8_t  sensorType;
 } MsgSensorControlData;
 
 
