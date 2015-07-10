@@ -760,7 +760,6 @@ static OSP_STATUS_t SensorControlActivate( SensorControl_t *pControl)
 {
     MessageBuffer *pSendMsg = NULLP;
     InputSensor_t sensorType;
-    InputSensorHandle_t Handle;
 
     if ( pControl == NULL )
         return OSP_STATUS_NULL_POINTER;

@@ -77,7 +77,7 @@
  * @return  MQ_SUCCESS or Error code enum corresponding to the error encountered
  *
  ***************************************************************************************************/
-static int16_t ParseSensorDataPkt( SensorPacketTypes_t *pOut, uint8_t *pPacket, uint16_t pktSize )
+static int16_t __attribute__((unused)) ParseSensorDataPkt( SensorPacketTypes_t *pOut, uint8_t *pPacket, uint16_t pktSize )
 {
     HostIFPackets_t *pHif = (HostIFPackets_t*)pPacket;
     int16_t errCode = -MQ_UNSUPPORTED_FEATURE;
@@ -664,14 +664,12 @@ int16_t FormatSensorEnableReq( uint8_t *pDest, osp_bool_t enable, ASensorType_t 
  * @return  MQ_SUCCESS or Error code enum corresponding to the error encountered
  *
  ***************************************************************************************************/
-static int16_t ParseControlRequestPkt( SensorPacketTypes_t *pOut, uint8_t *pPacket, uint16_t pktSize )
+static int16_t __attribute__((unused)) ParseControlRequestPkt( SensorPacketTypes_t *pOut, uint8_t *pPacket, uint16_t pktSize )
 {
     HostIFPackets_t *pHif = (HostIFPackets_t*)pPacket;
-    int16_t errCode = -MQ_UNSUPPORTED_FEATURE;
-    uint8_t sensType;
-    osp_bool_t isPrivateType;
-    uint8_t seqNum;
-    int16_t lengthParsed;
+    uint8_t sensType __attribute__((unused));
+    osp_bool_t isPrivateType __attribute__((unused));
+    uint8_t seqNum __attribute__((unused));
 
     /* Sanity... */
     if ((pOut == NULL) || (pPacket == NULL))

@@ -93,7 +93,8 @@
 #include "mag_common.h"
 #include "osp-sensors.h"
 #include "sensacq_i2c.h"
-#include "board.h"
+#include "gpio_api.h"
+#include "gpio_irq_api.h"
 
 static struct bmm050 *p_bmm050;
 static struct bmm050 bmm050;
@@ -126,18 +127,30 @@ static void mag_activate(bool enable)
 
 void Mag_HardwareSetup(osp_bool_t enable)
 {
+    gpio_t hostifIrq;
 	NVIC_SetPriority(MAG_PINT_IRQn, SENSOR_IRQ_PRIORITY);
 	NVIC_DisableIRQ(MAG_PINT_IRQn);
 
 	/* MAG INT2 irq setup */
-	Chip_GPIO_SetPinDIRInput(LPC_GPIO, MAG_INT_PORT, MAG_INT_PIN);
+	//Chip_GPIO_SetPinDIRInput(LPC_GPIO, MAG_INT_PORT, MAG_INT_PIN);
+    hostifIrq.pin = ENCODE_PORT_PIN(MAG_INT_PORT, MAG_INT_PIN);
+    gpio_dir(&hostifIrq,PIN_INPUT);
+    
 	Chip_INMUX_PinIntSel(MAG_PINT_SEL, MAG_INT_PORT, MAG_INT_PIN);	/* Configure INMUX block */
-	Chip_PININT_SetPinModeEdge(LPC_PININT, MAG_PINT_CH);/* edge sensitive and rising edge interrupt */
-	Chip_PININT_EnableIntHigh(LPC_PININT, MAG_PINT_CH);
+//	Chip_PININT_SetPinModeEdge(LPC_PININT, MAG_PINT_CH);/* edge sensitive and rising edge interrupt */
+//	Chip_PININT_EnableIntHigh(LPC_PININT, MAG_PINT_CH);
+    {
+        gpio_irq_t gpioIrq;
+        gpioIrq.irq_index = MAG_PINT_CH;
+        gpioIrq.event = IRQ_EDGE_RISE;
+        gpio_irq_enable(&gpioIrq);
+    }
 	Chip_SYSCON_EnableWakeup(MAG_WAKE);	/* enable to wake from sleep */
 	Chip_SYSCON_EnableWakeup(SYSCON_STARTER_WWDT);	/* enable to wake from sleep */
 
-	Chip_GPIO_SetPinDIRInput(LPC_GPIO, MAG_INT3_PORT, MAG_INT3_PIN);
+	//Chip_GPIO_SetPinDIRInput(LPC_GPIO, MAG_INT3_PORT, MAG_INT3_PIN);
+    hostifIrq.pin = ENCODE_PORT_PIN(MAG_INT3_PORT, MAG_INT3_PIN);
+    gpio_dir(&hostifIrq,PIN_INPUT);
 
 }
 
@@ -222,7 +235,9 @@ void Mag_ReadData(MsgMagData *magData)
 }
 void MAG_IRQHandler(void)
 {
+    gpio_irq_t gpioIrq;
 	uint32_t currTime = GetCurrentTime();
+    gpioIrq.irq_index = MAG_PINT_CH;
 #if 0
 	uint32_t currTime = g_Timer.GetCurrent();
 	PhysicalSensor_t* pSens = g_phySensors[PHYS_MAG_ID];
@@ -230,10 +245,12 @@ void MAG_IRQHandler(void)
 	pSens->ts_lastSample = currTime;
 	
 	pSens->irq_pending++;
-	Chip_PININT_ClearIntStatus(LPC_PININT, MAG_PINT_CH);
+//	Chip_PININT_ClearIntStatus(LPC_PININT, MAG_PINT_CH);
+    gpio_irq_disable(&gpioIrq);
 	ResMgr_IRQDone();
 #else
-	Chip_PININT_ClearIntStatus(LPC_PININT, MAG_PINT_CH);
+//	Chip_PININT_ClearIntStatus(LPC_PININT, MAG_PINT_CH);
+    gpio_irq_disable(&gpioIrq);
 	SendDataReadyIndication(MAG_INPUT_SENSOR, currTime);
 #endif
 }

@@ -61,7 +61,7 @@
 #undef IN_ASF_TASK_DEF
 
 #define ASF_TASK 
-#define ASF_TASK_ARG    void *argv
+#define ASF_TASK_ARG    void const *argv
 
 
 /*-------------------------------------------------------------------------------------------------*\

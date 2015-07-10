@@ -62,7 +62,7 @@
 //   <i> Defines stack size for main thread.
 //   <i> Default: 200
 #ifndef OS_MAINSTKSIZE
- #define OS_MAINSTKSIZE 200      // this stack size value is in words
+ #define OS_MAINSTKSIZE 0x100      // this stack size value is in words
 #endif
  
 //   <o>Number of threads with user-provided stack size <0-250>
@@ -83,7 +83,7 @@
 //   <i> Enable stack overflow checks at thread switch.
 //   <i> Enabling this option increases slightly the execution time of a thread switch.
 #ifndef OS_STKCHECK
- #define OS_STKCHECK    1
+ #define OS_STKCHECK    0
 #endif
  
 //   <q>Stack usage watermark

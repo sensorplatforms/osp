@@ -43,7 +43,7 @@ typedef struct AsfTaskInitDefTag
     void        (*entryPoint)();
     char        *tskName;
     uint16_t    stackSize;
-    uint8_t     priority;
+    int8_t      priority;
     char        *tidString; /* String equivalent of the TASK_ID enum */
     const osThreadDef_t * posThreadDef;
     const osMailQDef_t	*mailQDef;

@@ -69,7 +69,7 @@ static osp_bool_t _asfTimerInitialized = FALSE;
  * @return  none
  *
  ***************************************************************************************************/
-static void AsfTimerInit(void)
+static void __attribute__((unused)) AsfTimerInit(void)
 {
     if ( _asfTimerInitialized == FALSE ) { 
         uint16_t i; 
