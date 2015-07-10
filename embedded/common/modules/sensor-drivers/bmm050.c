@@ -259,7 +259,7 @@ BMM050_RETURN_FUNCTION_TYPE bmm050_init(struct bmm050 *bmm050)
 	comres = p_bmm050->BMM050_BUS_READ_FUNC(p_bmm050->dev_addr,
 											BMM050_CHIP_ID, a_data_u8r, 1);
 	p_bmm050->company_id = a_data_u8r[0];
-	D0_printf("Returned: 0x%x\r\n", (uint32_t)(a_data_u8r[0]));
+	//D0_printf("Returned: 0x%x\r\n", (uint32_t)(a_data_u8r[0]));
 	/* Function to initialise trim values */
 	bmm050_init_trim_registers();
 	bmm050_set_presetmode(BMM050_PRESETMODE_REGULAR);

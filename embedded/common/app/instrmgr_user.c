@@ -33,7 +33,7 @@ RtcClock_t gRtcClockData;
 /*-------------------------------------------------------------------------------------------------*\
  |    P R I V A T E   C O N S T A N T S   &   M A C R O S
 \*-------------------------------------------------------------------------------------------------*/
-
+#define	INSTR_MGR_SAMPLE_PERIOD (1000)	//This is currently unused
 /*-------------------------------------------------------------------------------------------------*\
  |    P R I V A T E   T Y P E   D E F I N I T I O N S
 \*-------------------------------------------------------------------------------------------------*/
@@ -110,7 +110,7 @@ void InstrManagerUserInit( void )
 {
     sInitialTime = os_time;
 
-   // ASFTimerStart( INSTR_MANAGER_TASK_ID, TIMER_REF_RTC_UPDATE, TICS_PER_SEC, &sRtcUpdateTimer );
+    // ASFTimerStart( INSTR_MANAGER_TASK_ID, TIMER_REF_RTC_UPDATE, INSTR_MGR_SAMPLE_PERIOD, &sRtcUpdateTimer );
 }
 
 
@@ -137,7 +137,7 @@ osp_bool_t InstrManagerUserHandler( MessageBuffer *pMsg )
             UpdateRTC();
 
             /* Restart timer for periodic output */
-            // ASFTimerStart( INSTR_MANAGER_TASK_ID, TIMER_REF_RTC_UPDATE, TICS_PER_SEC, &sRtcUpdateTimer );
+            // ASFTimerStart( INSTR_MANAGER_TASK_ID, TIMER_REF_RTC_UPDATE, INSTR_MGR_SAMPLE_PERIOD, &sRtcUpdateTimer );
             break;
 
         default:

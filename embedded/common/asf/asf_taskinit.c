@@ -21,14 +21,13 @@
 #include "common.h"
 #include "asf_taskstruct.h"
 #include <stdlib.h>
-
+#include "cmsis_os.h"
 
 /*-------------------------------------------------------------------------------------------------*\
  |    E X T E R N A L   V A R I A B L E S   &   F U N C T I O N S
 \*-------------------------------------------------------------------------------------------------*/
 void ASFMessagingInit( void );
 extern uint8_t GetTaskList( uint8_t **pTaskList );
-
 
 #define STACK_INCREASE                  0
 
@@ -56,6 +55,19 @@ extern uint8_t GetTaskList( uint8_t **pTaskList );
 #include "asf_taskdeftype.h"
 #include "asf_tasks.h"
 
+/**
+ * Define the CMSIS Thread structure
+ */
+#define ASF_TASK_DEF_TYPE ASF_THREAD_SETUP
+#include "asf_taskdeftype.h"
+#include "asf_tasks.h"
+
+/**
+ * Define the CMSIS Timer structure
+ */
+#define ASF_TASK_DEF_TYPE ASF_TIMER_SETUP
+#include "asf_taskdeftype.h"
+#include "asf_tasks.h"
 
 /**
  * This is the task initialization table which details all the information
@@ -76,6 +88,7 @@ const AsfTaskInitDef C_gAsfTaskInitTable[NUMBER_OF_TASKS] =
  */
 AsfTaskHandle asfTaskHandleTable[NUMBER_OF_TASKS];
 
+
 /*-------------------------------------------------------------------------------------------------*\
  |    P R I V A T E   C O N S T A N T S   &   M A C R O S
 \*-------------------------------------------------------------------------------------------------*/
@@ -88,9 +101,6 @@ const uint32_t TotalStkNeeded =
     128 /* System overhead */
 #include "asf_tasks.h"
 );
-
-/* Heap Area defined here */
-U64 NewHeap[TotalStkNeeded/8] = {0};
 
 
 /*-------------------------------------------------------------------------------------------------*\
@@ -127,7 +137,6 @@ void InitializeTasks( void )
     uint8_t  taskCounter, numTasks;
     TaskId tid;
     uint8_t *pTaskTable;
-    uint32_t *pU64Aligned;
 
     /* Create tasks  based on the mode we are in */
     numTasks = GetTaskList( &pTaskTable );
@@ -137,31 +146,22 @@ void InitializeTasks( void )
 
         if (tid != INSTR_MANAGER_TASK_ID)
         {
-            /* Allocate task stack from heap */
-            /* NOTE: All mallocs are 8-byte aligned as per ARM stack alignment requirements */
-            pU64Aligned = malloc( C_gAsfTaskInitTable[tid].stackSize );
-            ASF_assert( pU64Aligned != NULL );
-            ASF_assert( ((uint32_t)pU64Aligned & 0x7) == 0 ); //Ensure 64-bit aligned
+            asfTaskHandleTable[tid].posThreadId  = osThreadCreate(C_gAsfTaskInitTable[tid].posThreadDef,NULL);
 
-            asfTaskHandleTable[tid].handle  = os_tsk_create_user( C_gAsfTaskInitTable[tid].entryPoint,
-                C_gAsfTaskInitTable[tid].priority, pU64Aligned, C_gAsfTaskInitTable[tid].stackSize);
-            ASF_assert( asfTaskHandleTable[tid].handle != 0 );
+            ASF_assert( asfTaskHandleTable[tid].posThreadId != NULL );
             asfTaskHandleTable[tid].stkSize = C_gAsfTaskInitTable[tid].stackSize;
-            asfTaskHandleTable[tid].pStack = pU64Aligned; /* Keep track of our stack pointer */
+            asfTaskHandleTable[tid].pStack = NULL; /* Keep track of our stack pointer */
         }
 
         /* Initialize the associated queue */
-        if (asfTaskHandleTable[tid].handle != 0)
+        if (NULL != asfTaskHandleTable[tid].posThreadId)
         {
-            os_mbx_init( C_gAsfTaskInitTable[tid].queue, C_gAsfTaskInitTable[tid].queueSize );
+            asfTaskHandleTable[tid].posMailQId = osMailCreate(C_gAsfTaskInitTable[tid].mailQDef,NULL);
         }
     }
 
-    /* Initialize the messaging */
-    ASFMessagingInit();
-
     /* Switch the priority to be lowest now */
-    os_tsk_prio_self( C_gAsfTaskInitTable[INSTR_MANAGER_TASK_ID].priority );
+    osThreadSetPriority(asfTaskHandleTable[INSTR_MANAGER_TASK_ID].posThreadId,osPriorityLow);
 }
 
 
@@ -178,18 +178,27 @@ void InitializeTasks( void )
  ***************************************************************************************************/
 void AsfInitialiseTasks ( void )
 {
-    uint32_t *pU64Aligned;
+    uint8_t  taskCounter=0;
+    TaskId tid;
+    uint8_t *pTaskTable;
 
+    /* Create tasks  based on the mode we are in */
+    GetTaskList( &pTaskTable );
+    tid = (TaskId)pTaskTable[taskCounter];
+
+    /* Allocate task stack from heap */
     /* NOTE: All mallocs are 8-byte aligned as per ARM stack alignment requirements */
-    pU64Aligned = malloc( C_gAsfTaskInitTable[INSTR_MANAGER_TASK_ID].stackSize );
-    ASF_assert( ((uint32_t)pU64Aligned & 0x7) == 0 ); //Ensure 64-bit aligned
+    /* Initialize the messaging */
+    ASFMessagingInit();
 
-    asfTaskHandleTable[INSTR_MANAGER_TASK_ID].handle  = 1; //Initial task always gets this OS_ID
-    asfTaskHandleTable[INSTR_MANAGER_TASK_ID].stkSize = C_gAsfTaskInitTable[INSTR_MANAGER_TASK_ID].stackSize;
-    asfTaskHandleTable[INSTR_MANAGER_TASK_ID].pStack = pU64Aligned;
+    asfTaskHandleTable[tid].posThreadId = osThreadCreate(C_gAsfTaskInitTable[tid].posThreadDef,NULL);
 
-    /* Initialize RTX and start initialTask */
-    os_sys_init_user( InstrManagerTask, 254, pU64Aligned, C_gAsfTaskInitTable[INSTR_MANAGER_TASK_ID].stackSize );
+    ASF_assert( NULL != asfTaskHandleTable[tid].posThreadId );
+
+    asfTaskHandleTable[tid].stkSize = C_gAsfTaskInitTable[tid].stackSize;
+    asfTaskHandleTable[tid].pStack = NULL; /* Keep track of our stack pointer */
+
+    osThreadTerminate(osThreadGetId());
 }
 
 

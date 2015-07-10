@@ -26,6 +26,7 @@
 #endif
 
 #include <stdint.h>
+#include "cmsis_os.h"
 
 /*-------------------------------------------------------------------------------------------------*\
  |    T Y P E   D E F I N I T I O N S
@@ -41,12 +42,12 @@ typedef struct AsfTaskInitDefTag
     TaskId      taskId;
     void        (*entryPoint)();
     char        *tskName;
-    OS_ID       queue;
-    uint16_t    queueSize;
     uint16_t    stackSize;
     uint8_t     priority;
     char        *tidString; /* String equivalent of the TASK_ID enum */
-
+    const osThreadDef_t * posThreadDef;
+    const osMailQDef_t	*mailQDef;
+    const osTimerDef_t	*timerDef;
 } AsfTaskInitDef;
  
 

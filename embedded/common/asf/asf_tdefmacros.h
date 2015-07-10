@@ -48,7 +48,7 @@
 
 #if ASF_TASK_DEF_TYPE == ASF_QUEUE_SETUP
 # define ASF_TASK_STATIC( ThreadId, EntryFunction, Priority, StackSize, QueueSize )           \
-    os_mbx_declare( Q_##ThreadId, QueueSize );
+    osMailQDef(ThreadId, QueueSize, MessageBlock);
 #endif
 
 #if ASF_TASK_DEF_TYPE == ASF_TASK_DECLARE
@@ -58,7 +58,7 @@
 
 #if ASF_TASK_DEF_TYPE == ASF_TASK_SETUP
 # define ASF_TASK_STATIC( ThreadId, EntryFunction, Priority, StackSize, QueueSize )             \
-        { ThreadId, EntryFunction, #EntryFunction, Q_##ThreadId, sizeof(Q_##ThreadId), StackSize, Priority, #ThreadId },
+        { ThreadId, EntryFunction, #EntryFunction, StackSize, Priority, #ThreadId, osThread(EntryFunction),osMailQ(ThreadId),osTimer(ThreadId)},
 #endif
 
 #if ASF_TASK_DEF_TYPE == ASF_TOTAL_STACK_NEEDED
@@ -66,7 +66,17 @@
     +ThreadId##_StkSize
 #endif
 
+#if ASF_TASK_DEF_TYPE == ASF_THREAD_SETUP
+# define ASF_TASK_STATIC( ThreadId, EntryFunction, Priority, StackSize, QueueSize )           \
+    osThreadDef(EntryFunction,Priority,1,StackSize);
+#endif
+
+#if ASF_TASK_DEF_TYPE == ASF_TIMER_SETUP
+#define ASF_TASK_STATIC( ThreadId, EntryFunction, Priority, StackSize, QueueSize )           \
+    osTimerDef(ThreadId, ASFTimerCallback);
+#endif
 
 /*-------------------------------------------------------------------------------------------------*\
  |    E N D   O F   F I L E
 \*-------------------------------------------------------------------------------------------------*/
+

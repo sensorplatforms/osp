@@ -730,8 +730,6 @@ void HardFault_Handler(uint32_t stack[])
 int main(void)
 { 
     
-    uint32_t timer = 0;
-    
     /* Update core clock variables */
     SystemCoreClockUpdate();
     
@@ -761,6 +759,24 @@ int main(void)
 	/* If it got here something bad happened */
 	ASF_assert_fatal(false);
 }
+
+#ifdef __MICROLIB
+/***********************************************************************
+ * @fn      exit
+ *          Main Exit point from the application firmware
+ *          This function is required if microlib is used
+ *
+ * @param   Error code
+ *
+ * @return  none
+ *
+ ***********************************************************************/
+void exit(uint32_t error)
+{
+	__ASM volatile("BKPT #01");
+    while(1);
+}
+#endif
 
 /*------------------------------------------------------------------*\
  |    E N D   O F   F I L E
