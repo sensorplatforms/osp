@@ -26,7 +26,6 @@
 /*-------------------------------------------------------------------------------------------------*\
  |    E X T E R N A L   V A R I A B L E S   &   F U N C T I O N S
 \*-------------------------------------------------------------------------------------------------*/
-extern const AsfTaskInitDef C_gAsfTaskInitTable[NUMBER_OF_TASKS];
 
 /*-------------------------------------------------------------------------------------------------*\
  |    P U B L I C   V A R I A B L E S   D E F I N I T I O N S
@@ -35,7 +34,6 @@ extern const AsfTaskInitDef C_gAsfTaskInitTable[NUMBER_OF_TASKS];
 /*-------------------------------------------------------------------------------------------------*\
  |    P R I V A T E   C O N S T A N T S   &   M A C R O S
 \*-------------------------------------------------------------------------------------------------*/
-#define MESSAGE_BLOCK_SIZE  (sizeof(MessageBlock))
 
 /*-------------------------------------------------------------------------------------------------*\
  |    P R I V A T E   T Y P E   D E F I N I T I O N S
@@ -51,12 +49,8 @@ uint32_t debugMessageBlockSize = 0;
 
 #define TRACK_MSG_POOL	0
 #if USE_ALLOC
-_declare_box( mpool, ///< this memory pool will be used to allocate the messages
-    MESSAGE_BLOCK_SIZE, /**< this is the size of the regular messages.
-          To avoid variable length, we allocate from this fixed size. If memory usage become issue
-          we can divide the messages among various pool size that would optimize memory usage */
-    MAX_SYSTEM_MESSAGES   //< Max (non dprintf) messages in the system
-    );
+osPoolDef(cmpool, MAX_SYSTEM_MESSAGES, MessageBlock); 		   /* Define memory pool			  */
+osPoolId cmpool;
 #else
 struct _MsgPool {
 	volatile int32_t	status;
@@ -141,7 +135,7 @@ static void MsgPool_put(struct _MsgPool *p, void *m)
  *
  * @see     ASFCreateMessage(), ASFSendMessage(), ASFReceiveMessage()
  ***************************************************************************************************/
-static void _ASFDeleteMessage ( MessageBuffer **pMbuf, char *_file, int _line )
+void _ASFDeleteMessage ( TaskId rcvTask, MessageBuffer **pMbuf, char *_file, int _line )
 {
     MessageBlock *pBlock;
 
@@ -151,7 +145,7 @@ static void _ASFDeleteMessage ( MessageBuffer **pMbuf, char *_file, int _line )
         /* Get the block pointer */
         M_GetMsgBlockFromBuffer (pBlock, *pMbuf);
 #if USE_ALLOC
-        ASF_assert( _free_box( mpool, pBlock ) == 0 );
+        ASF_assert( osPoolFree( cmpool, pBlock ) == osOK);
 #else
         MsgPool_put(MsgPool, pBlock);
 #endif
@@ -174,7 +168,7 @@ static void _ASFDeleteMessage ( MessageBuffer **pMbuf, char *_file, int _line )
 void ASFMessagingInit( void )
 {
 #if USE_ALLOC
-    _init_box( mpool, sizeof(mpool), MESSAGE_BLOCK_SIZE );
+    cmpool = osPoolCreate(osPool(cmpool));
 #else
 	MsgPool_init(MsgPool);
 #endif
@@ -204,7 +198,7 @@ AsfResult_t _ASFCreateMessage( MessageId msgId, uint16_t msgSize, MessageBuffer 
     ASF_assert_var( *pMbuf == NULLP, msgId, 0, 0 );
 
 #if USE_ALLOC
-    pBlock = _alloc_box(mpool);
+    pBlock = osPoolAlloc(cmpool);
 #else
 	pBlock = MsgPool_get(MsgPool, _file, _line);
 #endif
@@ -235,7 +229,7 @@ uint32_t	wtf_msg_cnt = 0;
 AsfResult_t _ASFSendMessage ( TaskId destTask, MessageBuffer *pMbuf, char *_file, int _line )
 {
     MessageBlock *pBlock;
-    OS_RESULT err;
+    osStatus os_ret = osErrorOS;
 
     /* Check for the usual - null pointers etc. */
     ASF_assert_var( pMbuf != NULLP, pMbuf->msgId, 0, 0 );
@@ -244,33 +238,16 @@ AsfResult_t _ASFSendMessage ( TaskId destTask, MessageBuffer *pMbuf, char *_file
     M_GetMsgBlockFromBuffer (pBlock, pMbuf);
 
     pBlock->header.destTask = destTask;
-
-    /* Send the message without pending */
-    if ( GetContext() != CTX_ISR )
+    os_ret = osMailPut(asfTaskHandleTable[destTask].posMailQId,pMbuf);
+    if(osOK != os_ret)
     {
-        err = os_mbx_send( C_gAsfTaskInitTable[destTask].queue, pMbuf, 0 );
-        if (err != OS_R_OK) //Mailbox is not valid or full
-        {
 #if USE_ALLOC
-            ASF_assert( _free_box( mpool, pBlock ) == 0 );
+        ASF_assert( osPoolFree( cmpool, pBlock ) == 0 );
 #else
 		MsgPool_put(MsgPool, pBlock);
 #endif
-            return ASF_ERR_Q_FULL;
-        }
-    }
-    else
-    {
-        err = isr_mbx_check( C_gAsfTaskInitTable[destTask].queue );
-	if (err != 0) {
-#if 0
-		ASF_assert_var(err != 0, err, pMbuf->msgId, destTask);
-#endif
-		isr_mbx_send( C_gAsfTaskInitTable[destTask].queue, pMbuf );
-	} else {
-		wtf_msg_cnt++;
+        return ASF_ERR_Q_FULL;
 	}
-    }
     return ASF_OK;
 }
 
@@ -292,16 +269,17 @@ AsfResult_t _ASFSendMessage ( TaskId destTask, MessageBuffer *pMbuf, char *_file
  ***************************************************************************************************/
 void _ASFReceiveMessage ( TaskId rcvTask, MessageBuffer **pMbuf, char *_file, int _line )
 {
-    OS_RESULT   err;
+    osEvent  evt;
 
     /* Delete old/previous message to release its buffer */
-    _ASFDeleteMessage( pMbuf, _file, _line );
+    _ASFDeleteMessage( rcvTask, pMbuf, _file, _line );
 
-    /* Wait for receive */
-    err = os_mbx_wait( C_gAsfTaskInitTable[rcvTask].queue, (void **)pMbuf, OS_WAIT_FOREVER );
-    ASF_assert_var(((err == OS_R_OK) || (err == OS_R_MBX)), err, 0, 0);
+    evt = osMailGet(asfTaskHandleTable[rcvTask].posMailQId,osWaitForever);
+    if (evt.status == osEventMail)
+    {
+        *pMbuf = evt.value.p;
+    }
 }
-
 
 /****************************************************************************************************
  * @fn      ASFReceiveMessagePoll
@@ -320,18 +298,21 @@ void _ASFReceiveMessage ( TaskId rcvTask, MessageBuffer **pMbuf, char *_file, in
  ***************************************************************************************************/
 osp_bool_t _ASFReceiveMessagePoll ( TaskId rcvTask, MessageBuffer **pMbuf, char *_file, int _line )
 {
-    OS_RESULT   err;
+    osEvent  evt;
 
     /* Delete old message to release its buffer */
-    _ASFDeleteMessage( pMbuf, _file, _line );
+    _ASFDeleteMessage( rcvTask, pMbuf, _file, _line );
 
     /* Wait for receive */
-    err = os_mbx_wait( C_gAsfTaskInitTable[rcvTask].queue, (void **)pMbuf, OS_WAIT_NEVER );
-    if (err == OS_R_TMO)
+    evt = osMailGet( asfTaskHandleTable[rcvTask].posMailQId, 0 );
+    if (evt.status == osEventTimeout)
     {
         return false;
     }
-    ASF_assert_var(((err == OS_R_OK) || (err == OS_R_MBX)), err, 0, 0);
+    if (evt.status == osEventMail)
+    {
+        *pMbuf = evt.value.p;
+    }
     return true;
 }
 

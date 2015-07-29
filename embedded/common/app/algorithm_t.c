@@ -26,6 +26,8 @@
 /*--------------------------------------------------------------------*\
  |    E X T E R N A L   V A R I A B L E S   &   F U N C T I O N S
 \*--------------------------------------------------------------------*/
+osMutexDef(mutexCritSection);
+osMutexId mutex_id;
 
 /*--------------------------------------------------------------------*\
  |    P U B L I C   V A R I A B L E S   D E F I N I T I O N S
@@ -247,8 +249,6 @@ static  const OSP_Library_Version_t* version;
 static ResultHandle_t _outSensorHandles[NUM_ANDROID_SENSOR_TYPE];   // Android Sensors
 static ResultHandle_t _outPSensorHandles[NUM_PRIVATE_SENSOR_TYPE];  // Private Sensors
 
-static OS_MUT mutexCritSection;
-
 /*--------------------------------------------------------------------*\
  |    F O R W A R D   F U N C T I O N   D E C L A R A T I O N S
 \*--------------------------------------------------------------------*/
@@ -277,12 +277,12 @@ SystemDescriptor_t gSystemDesc =
  **********************************************************************/
 __inline void EnterCriticalSection(void)
 {
-    os_mut_wait( mutexCritSection, OS_WAIT_FOREVER );
+    osMutexWait(mutex_id,osWaitForever);
 }
 
 __inline void ExitCriticalSection(void)
 {
-    os_mut_release( mutexCritSection );
+    osMutexRelease(mutex_id);
 }
 
 
@@ -760,7 +760,6 @@ static OSP_STATUS_t SensorControlActivate( SensorControl_t *pControl)
 {
     MessageBuffer *pSendMsg = NULLP;
     InputSensor_t sensorType;
-    InputSensorHandle_t Handle;
 
     if ( pControl == NULL )
         return OSP_STATUS_NULL_POINTER;
@@ -824,6 +823,9 @@ ASF_TASK  void AlgorithmTask (ASF_TASK_ARG)
 
     OSP_GetLibraryVersion(&version);
     D1_printf("OSP Version: %s\r\n", version->VersionString);
+
+    /* Initialize the mutex */
+    mutex_id = osMutexCreate(osMutex(mutexCritSection));
 
     OSP_Status = OSP_Initialize(&gSystemDesc);
     ASF_assert_msg(OSP_STATUS_OK == OSP_Status, "OSP_Initialize Failed");
@@ -909,6 +911,7 @@ ASF_TASK  void AlgorithmTask (ASF_TASK_ARG)
             D1_printf("Alg-FG:!!!UNHANDLED MESSAGE:%d!!!\r\n", rcvMsg->msgId);
             break;
         }
+        ASFDeleteMessage( ALGORITHM_TASK_ID, &rcvMsg );
 #ifdef DEBUG_TEST_SENSOR_SUBSCRIPTION
         // Testing subscribe and unsubscribe sensors
         DebugTestSensorSubscription();
@@ -952,6 +955,7 @@ ASF_TASK  void AlgBackGndTask (ASF_TASK_ARG)
             D1_printf("Alg-BG:!!!UNHANDLED MESSAGE:%d!!!\r\n", rcvMsg->msgId);
             break;
         }
+        ASFDeleteMessage( ALG_BG_TASK_ID, &rcvMsg );
     }
 }
 

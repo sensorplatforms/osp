@@ -89,10 +89,11 @@
 #include "bmg160.h"
 #include "sensorhub.h"
 #include "common.h"
-#include "board.h"
 #include "gyro_common.h"
 #include "osp-sensors.h"
 #include "sensacq_i2c.h"
+#include "gpio_api.h"
+#include "gpio_irq_api.h"
 
 static struct bmg160_t *p_bmg160 = NULL;
 static struct bmg160_t bmg160;
@@ -137,12 +138,21 @@ static void gyro_activate(bool enable)
 
 void Gyro_HardwareSetup(osp_bool_t enable)
 {
+    gpio_t hostifIrq;
 	NVIC_DisableIRQ(GYRO_PINT_IRQn);
 	NVIC_SetPriority(GYRO_PINT_IRQn, SENSOR_IRQ_PRIORITY);
-	Chip_GPIO_SetPinDIRInput(LPC_GPIO, GYRO_INT_PORT, GYRO_INT_PIN);
+	//Chip_GPIO_SetPinDIRInput(LPC_GPIO, GYRO_INT_PORT, GYRO_INT_PIN);
+    hostifIrq.pin = ENCODE_PORT_PIN(GYRO_INT_PORT, GYRO_INT_PIN);
+    gpio_dir(&hostifIrq,PIN_INPUT);
     Chip_INMUX_PinIntSel(GYRO_PINT_SEL,GYRO_INT_PORT, GYRO_INT_PIN);    
-	Chip_PININT_SetPinModeEdge(LPC_PININT, GYRO_PINT_CH);
-	Chip_PININT_EnableIntHigh(LPC_PININT, GYRO_PINT_CH);   
+//	Chip_PININT_SetPinModeEdge(LPC_PININT, GYRO_PINT_CH);
+//	Chip_PININT_EnableIntHigh(LPC_PININT, GYRO_PINT_CH);
+    {
+        gpio_irq_t gpioIrq;
+        gpioIrq.irq_index = GYRO_PINT_CH;
+        gpioIrq.event = IRQ_EDGE_RISE;
+        gpio_irq_enable(&gpioIrq);
+    }
     Chip_SYSCON_EnableWakeup(GYRO_WAKE); 
 }
 
@@ -228,7 +238,9 @@ void Gyro_ReadData(MsgGyroData *gyroData)
 
 void GYRO_IRQHandler(void)
 {
+    gpio_irq_t gpioIrq;
 	uint32_t currTime = GetCurrentTime();
+    gpioIrq.irq_index = GYRO_PINT_CH;
 #if 0
 	PhysicalSensor_t* pSens = g_phySensors[PHYS_GYRO_ID];
 	uint32_t currTime = g_Timer.GetCurrent();
@@ -236,10 +248,12 @@ void GYRO_IRQHandler(void)
 	pSens->ts_lastSample = currTime;
 
 	pSens->irq_pending++;
-	Chip_PININT_ClearIntStatus(LPC_PININT, GYRO_PINT_CH);
+//	Chip_PININT_ClearIntStatus(LPC_PININT, GYRO_PINT_CH);
+    gpio_irq_disable(&gpioIrq);
 	ResMgr_IRQDone();
 #else
-	Chip_PININT_ClearIntStatus(LPC_PININT, GYRO_PINT_CH);
+//	Chip_PININT_ClearIntStatus(LPC_PININT, GYRO_PINT_CH);
+    gpio_irq_disable(&gpioIrq);
 	SendDataReadyIndication(GYRO_INPUT_SENSOR, currTime);
 #endif
 }
@@ -283,7 +297,9 @@ void GYRO_IRQHandler(void)
 BMG160_RETURN_FUNCTION_TYPE bmg160_init(struct bmg160_t *bmg160)
 {
 	BMG160_RETURN_FUNCTION_TYPE comres = 0;
+#if 0
 	unsigned char a_data_u8r;
+#endif
 	p_bmg160 = bmg160;
 
 	p_bmg160->dev_addr = BMG160_I2C_ADDR;

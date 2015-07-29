@@ -19,7 +19,7 @@
  |    I N C L U D E   F I L E S
 \*-------------------------------------------------------------------------------------------------*/
 #include "common.h"
-
+#include "asf_taskstruct.h"
 /*-------------------------------------------------------------------------------------------------*\
  |    E X T E R N A L   V A R I A B L E S   &   F U N C T I O N S
 \*-------------------------------------------------------------------------------------------------*/
@@ -34,6 +34,7 @@
 #ifndef RAM_START
 # define RAM_START           NVIC_VectTab_RAM
 #endif
+extern const AsfTaskInitDef C_gAsfTaskInitTable[NUMBER_OF_TASKS];
 
 #ifndef OS_TIMERCNT 
     #define OS_TIMERCNT (8)    // Make sure this value matches file rtx_conf_cm.c
@@ -68,7 +69,7 @@ static osp_bool_t _asfTimerInitialized = FALSE;
  * @return  none
  *
  ***************************************************************************************************/
-static void AsfTimerInit(void)
+static void __attribute__((unused)) AsfTimerInit(void)
 {
     if ( _asfTimerInitialized == FALSE ) { 
         uint16_t i; 
@@ -125,38 +126,12 @@ static void SendTimerExpiry ( AsfTimer *pTimer )
     MessageBuffer *pSendMsg = NULLP;
 
     ASF_assert( ASFCreateMessage( MSG_TIMER_EXPIRY, sizeof(MsgTimerExpiry), &pSendMsg ) == ASF_OK );
+    pSendMsg->msg.msgTimerExpiry.timerId   = (osTimerId)pTimer->timerId;
     pSendMsg->msg.msgTimerExpiry.userValue = pTimer->userValue;
-    pSendMsg->msg.msgTimerExpiry.timerId   = pTimer->timerId;
+    __enable_irq();
     ASF_assert( ASFSendMessage( pTimer->owner, pSendMsg ) == ASF_OK );
+    __disable_irq();
 }
-
-
-
-/****************************************************************************************************
- * @fn      ASFTimerStart
- *          Creates a new timer in the system with the given attributes.
- *
- * @param   pTimer  Pointer to timer control block containing the attributes of the timer to be
- *                  created.
- *
- * @return  none
- *
- * @see     ASFDeleteTimer()
- ***************************************************************************************************/
-static void _TimerStart ( AsfTimer *pTimer, char *_file, int _line )
-{    
-    if ( _asfTimerInitialized == FALSE ) AsfTimerInit();
-
-    ASF_assert( pTimer != NULLP );
-    ASF_assert( pTimer->sysUse != TIMER_SYS_ID ); //In case we are trying to restart a running timer
-
-    // Add this timer to the managed list 
-    pTimer->info = AsfTimerAddTimerToList(pTimer);
-    pTimer->sysUse = TIMER_SYS_ID;
-    pTimer->timerId = os_tmr_create( pTimer->ticks, pTimer->info );
-    ASF_assert( pTimer->timerId != NULL );
-}
-
 
 /*-------------------------------------------------------------------------------------------------*\
  |    P U B L I C     F U N C T I O N S
@@ -194,10 +169,21 @@ osp_bool_t ASFTimerStarted ( AsfTimer *pTimer )
 ***************************************************************************************************/
 void _ASFTimerStart( TaskId owner, uint16_t ref, uint16_t tick, AsfTimer *pTimer, char *_file, int _line  )
 {
+    uint16_t index = AsfTimerAddTimerToList(pTimer);  // Add this timer to the managed list 
+
     pTimer->owner = owner;
     pTimer->ticks = tick;
     pTimer->userValue = ref;
-    _TimerStart( pTimer, _file, _line );
+    if(pTimer->timerId == NULL)
+    {
+        pTimer->timerId = osTimerCreate(C_gAsfTaskInitTable[owner].timerDef,osTimerOnce,(void *)index);
+    }
+    if (pTimer->timerId) 
+    {
+        pTimer->sysUse = TIMER_SYS_ID;
+        osTimerStart(pTimer->timerId, pTimer->ticks);
+    }
+
 }
 
 
@@ -211,17 +197,21 @@ void _ASFTimerStart( TaskId owner, uint16_t ref, uint16_t tick, AsfTimer *pTimer
  *
  * @see     ASFKillTimer()
  ***************************************************************************************************/
-void _ASFTimerExpiry ( uint16_t info, char *_file, int _line )
+void _ASFTimerExpiry ( uint32_t info, char *_file, int _line )
 {
     AsfTimer *pTimer;
     int wasMasked = __disable_irq();
     pTimer = AsfTimerGetTimerFromList(info);
+    AsfTimerRemoveTimerFromList(info);
 
     //Look for our magic number to be sure we got the right pointer
     ASF_assert_var( pTimer->sysUse == TIMER_SYS_ID,  pTimer->ticks, pTimer->userValue, pTimer->owner);
-    SendTimerExpiry( pTimer );
+    /* Reset timer before starting to process it.
+     *  This is to prevent a race condition, where the processing task restarts a timer before we reset here.
+     * Timer thread runs on a lower priority then, the processing task
+     */
     pTimer->sysUse = (uint32_t)-1; //Timer no longer in use
-    AsfTimerRemoveTimerFromList(info);   
+    SendTimerExpiry( pTimer );
     if (!wasMasked) __enable_irq();
 }
 
@@ -239,14 +229,27 @@ void _ASFTimerExpiry ( uint16_t info, char *_file, int _line )
  ***************************************************************************************************/
 void _ASFKillTimer ( AsfTimer *pTimer, char *_file, int _line )
 {
-    TimerId ret;
+    osStatus    os_ret = osErrorOS;
     ASF_assert( pTimer != NULLP );
-    ret = os_tmr_kill( pTimer->timerId );
-    ASF_assert( ret == NULL );
+    os_ret = osTimerDelete(pTimer->timerId);
+    ASF_assert( os_ret == osOK );
     pTimer->sysUse = (uint32_t)-1; //Timer no longer in use
     AsfTimerRemoveTimerFromList(pTimer->info);
 }
-
+/****************************************************************************************************
+ * @fn      ASFTimerCallback
+ *          Timer callback registered with CMSIS for timer expiry notification
+ *
+ * @param   argument  Param provided to CMSIS for callback, this is the index used to retrieve the task(owner) info.
+ *
+ * @return  none
+ *
+ * @see     ASFTimerExpiry()
+ ***************************************************************************************************/
+void ASFTimerCallback(void const *argument)
+{
+    ASFTimerExpiry((uint32_t)argument);
+}
 
 /*-------------------------------------------------------------------------------------------------*\
  |    E N D   O F   F I L E

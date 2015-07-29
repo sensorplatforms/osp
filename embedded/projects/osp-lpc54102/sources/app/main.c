@@ -18,13 +18,14 @@
 /*---------------------------------------------------------------------*\
  |    I N C L U D E   F I L E S
 \*---------------------------------------------------------------------*/
-#include "board.h"
+//#include "board.h"
 #include "common.h"
 #include "hw_setup.h"
 #include "sensorhub.h"
 #include <string.h>
 #include "romapi_uart.h"
-
+#include "gpio_api.h"
+#include "pinmap.h"
 
 /*---------------------------------------------------------------------*\
  |    E X T E R N A L   V A R I A B L E S   &   F U N C T I O N S
@@ -99,9 +100,11 @@ static void UART_PinMuxSetup(void)
 {   
 #if defined(BOARD_NXP_LPCXPRESSO_54102)
 	/* Setup UART TX Pin */
-	Chip_IOCON_PinMuxSet(LPC_IOCON, 0, 0, (IOCON_FUNC1 | IOCON_MODE_INACT | IOCON_DIGITAL_EN));
+	//Chip_IOCON_PinMuxSet(LPC_IOCON, 0, 0, (IOCON_FUNC1 | IOCON_MODE_INACT | IOCON_DIGITAL_EN));
+    pin_function( ENCODE_PORT_PIN((uint8_t)Port_0, (uint8_t)Pin_0), (PINMAP_FUNC1 | PINMAP_MODE_INACT | PINMAP_DIGITAL_EN));
 	/* Setup UART RX Pin */
-	Chip_IOCON_PinMuxSet(LPC_IOCON, 0, 1, (IOCON_FUNC1 | IOCON_MODE_INACT | IOCON_DIGITAL_EN));
+	//Chip_IOCON_PinMuxSet(LPC_IOCON, 0, 1, (IOCON_FUNC1 | IOCON_MODE_INACT | IOCON_DIGITAL_EN));
+    pin_function( ENCODE_PORT_PIN((uint8_t)Port_0, (uint8_t)Pin_1), (PINMAP_FUNC1 | PINMAP_MODE_INACT | PINMAP_DIGITAL_EN));
 	Chip_SYSCON_Enable_ASYNC_Syscon(true);	/* Enable Async APB */
 	Chip_Clock_SetAsyncSysconClockDiv(1);	/* Set Async clock divider to 1 */
 #else
@@ -110,7 +113,7 @@ static void UART_PinMuxSetup(void)
 }
 
 /* Initialize the UART ROM Driver */
-static int uartrom_init(void)
+static int __attribute__((unused)) uartrom_init(void)
 {
 	int sz;
 
@@ -129,7 +132,7 @@ static int uartrom_init(void)
 
 #define ABS(x) ((int) (x) < 0 ? -(x) : (x))
 /* Configure UART ROM Driver and pripheral */
-static int uartrom_config(void)
+static int __attribute__((unused)) uartrom_config(void)
 {
 	UART_CFG_T cfg;
 	UART_BAUD_T baud;
@@ -331,7 +334,7 @@ static void uartrom_rx_prog(UART_HANDLE_T hUART, UART_EVENT_T evt, void *arg)
 }
 
 /* Register call-backs */
-static void uartrom_regcb(void)
+static __attribute__((unused)) void uartrom_regcb(void)
 {
 	ROM_UART_RegisterCB(hUART, UART_CB_START, uartrom_xfer_start);	/* Start of transfer */
 	ROM_UART_RegisterCB(hUART, UART_CB_DONE, uartrom_xfer_done);/* End of transfer */
@@ -699,11 +702,11 @@ uint32_t GetCurrentTime(void)
 #define	SAVE_HARDFAULT
 #if defined(SAVE_HARDFAULT)
 enum { r0, r1, r2, r3, r12, lr, pc, psr};
-static uint32_t fault_hfsr;
-static uint32_t fault_cfsr;
-static uint32_t fault_pc;
-static uint32_t fault_lr;
-static uint32_t fault_r0;
+static uint32_t fault_hfsr __attribute__((unused));
+static uint32_t fault_cfsr __attribute__((unused));
+static uint32_t fault_pc __attribute__((unused));
+static uint32_t fault_lr __attribute__((unused));
+static uint32_t fault_r0 __attribute__((unused));
 #endif
 void HardFault_Handler(uint32_t stack[])
 {
@@ -730,8 +733,6 @@ void HardFault_Handler(uint32_t stack[])
 int main(void)
 { 
     
-    uint32_t timer = 0;
-    
     /* Update core clock variables */
     SystemCoreClockUpdate();
     
@@ -746,11 +747,17 @@ int main(void)
     Board_LED_Set(2, false);
     
     /* Initialize GPIO pin interrupt module */
-	Chip_PININT_Init(LPC_PININT);    
+	//Chip_PININT_Init(LPC_PININT);    
+    gpio_init((gpio_t *)NULL,(PinName)NULL);
         
     wdt_init();
    
-    Chip_GPIO_SetPinDIROutput(LPC_GPIO, HOSTIF_IRQ_PORT, HOSTIF_IRQ_PIN);
+    //Chip_GPIO_SetPinDIROutput(LPC_GPIO, HOSTIF_IRQ_PORT, HOSTIF_IRQ_PIN);
+    {
+        gpio_t hostifIrq;
+        hostifIrq.pin = ENCODE_PORT_PIN(HOSTIF_IRQ_PORT,HOSTIF_IRQ_PIN);
+        gpio_dir(&hostifIrq,PIN_OUTPUT);
+    }
    
     // Use the same setting in the bosch example. Restore to Audience setting later when able to run on the new board 
     setupClocking();
@@ -761,6 +768,24 @@ int main(void)
 	/* If it got here something bad happened */
 	ASF_assert_fatal(false);
 }
+
+#ifdef __MICROLIB
+/***********************************************************************
+ * @fn      exit
+ *          Main Exit point from the application firmware
+ *          This function is required if microlib is used
+ *
+ * @param   Error code
+ *
+ * @return  none
+ *
+ ***********************************************************************/
+void exit(uint32_t error)
+{
+	__ASM volatile("BKPT #01");
+    while(1);
+}
+#endif
 
 /*------------------------------------------------------------------*\
  |    E N D   O F   F I L E

@@ -37,6 +37,8 @@
 #define ASF_QUEUE_SETUP     3
 #define ASF_TASK_SETUP      4
 #define ASF_TASK_DECLARE    5
+#define ASF_THREAD_SETUP    6
+#define ASF_TIMER_SETUP    	7
 
 #define IN_ASF_TASK_DEF
 
@@ -58,8 +60,8 @@
 #undef ASF_TASK_DEF_TYPE
 #undef IN_ASF_TASK_DEF
 
-#define ASF_TASK        __task
-#define ASF_TASK_ARG    void *argv
+#define ASF_TASK 
+#define ASF_TASK_ARG    void const *argv
 
 
 /*-------------------------------------------------------------------------------------------------*\

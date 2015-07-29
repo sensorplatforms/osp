@@ -77,7 +77,8 @@ static uint8_t SerialRead( PortInfo *pPort, int8_t *pBuff, uint16_t length, uint
     uint32_t readIdx;
     uint16_t bytesRead = 0;
     uint8_t  retVal = APP_OK;
-    uint16_t evtFlags = 0;
+    osEvent evtFlags;
+    evtFlags.value.v=0;
 
     if ((pBuff == NULL) || (length == 0) || (length > RX_BUFFER_SIZE))
     {
@@ -91,8 +92,18 @@ static uint8_t SerialRead( PortInfo *pPort, int8_t *pBuff, uint16_t length, uint
             ((pPort->rxReadIdx + 1) % RX_BUFFER_SIZE))
         {
             /* Wait here for ISR event */
-            os_evt_wait_or( UART_CMD_RECEIVE | UART_CRLF_RECEIVE, EVT_WAIT_FOREVER );
-            evtFlags = os_evt_get();
+            osThreadId myId = osThreadGetId();
+            while(1){
+                evtFlags = osSignalWait(UART_CMD_RECEIVE,200);
+                if (evtFlags.status == osEventTimeout){
+                    evtFlags = osSignalWait(UART_CRLF_RECEIVE,200);
+                }
+                if (evtFlags.status == osEventSignal){
+                    break;
+                }
+            }
+            osSignalClear(myId,UART_CMD_RECEIVE);
+            osSignalClear(myId,UART_CRLF_RECEIVE);
         }
         else
         {
@@ -105,7 +116,7 @@ static uint8_t SerialRead( PortInfo *pPort, int8_t *pBuff, uint16_t length, uint
             }
             pBuff[bytesRead++] = pPort->rxBuffer[readIdx];
             pPort->rxReadIdx = readIdx;
-            if ( evtFlags & UART_CRLF_RECEIVE )
+            if ( evtFlags.value.signals & UART_CRLF_RECEIVE )
             {
                 break;
             }
