@@ -43,7 +43,13 @@ PortInfo gDbgUartPort;      //Debug information port
  */
 #ifdef UART_DMA_ENABLE
 # define DPRINTF_MPOOL_SIZE         (DPRINTF_BUFF_SIZE + 8)
-_declare_box( gMemPoolDprintf, DPRINTF_MPOOL_SIZE, MAX_DPRINTF_MESSAGES);
+typedef struct TempStructForPoolDefTag
+{
+    unsigned char uc_temp_for_pool_def[DPRINTF_MPOOL_SIZE]; //This variable is unused struct
+} TempStructForPoolDef;
+ /* Define memory pool */
+osPoolDef(gMemPoolDprintf, MAX_DPRINTF_MESSAGES, TempStructForPoolDef );
+osPoolId gMemPoolDprintf; 
 #endif
 
 
@@ -143,7 +149,7 @@ void *RemoveFromList( PortInfo *pPort )
 void DebugPortInit( void )
 {
 #if 0
-    _init_box( gMemPoolDprintf, sizeof(gMemPoolDprintf), DPRINTF_MPOOL_SIZE );
+    gMemPoolDprintf = osPoolCreate(osPool(gMemPoolDprintf));
     gDbgUartPort.pBuffPool = gMemPoolDprintf;
     gDbgUartPort.rxWriteIdx = 1;
     gDbgUartPort.rxReadIdx  = 0;
@@ -200,12 +206,12 @@ void RxBytesToBuff( PortInfo *pPort, uint8_t byte )
         {
             if (byte == '\r' || byte == '\n')
             {
-                isr_evt_set( UART_CRLF_RECEIVE, asfTaskHandleTable[pPort->rcvTask].handle );
+                osSignalSet(asfTaskHandleTable[pPort->rcvTask].posThreadId,UART_CRLF_RECEIVE);
             }
             else
             {
                 /* Wake up the task. */
-                isr_evt_set( UART_CMD_RECEIVE, asfTaskHandleTable[pPort->rcvTask].handle );
+                osSignalSet(asfTaskHandleTable[pPort->rcvTask].posThreadId,UART_CMD_RECEIVE);
             }
         }
 
@@ -233,7 +239,7 @@ void RxBytesToBuff( PortInfo *pPort, uint8_t byte )
 void *GetNextBuffer( PortInfo *pPort )
 {
     void *pFreeBuff = RemoveFromList( pPort );
-    ASF_assert(_free_box( pPort->pBuffPool, pFreeBuff ) == 0); //Free the current consumed buffer
+    ASF_assert(osPoolFree( pPort->pBuffPool, pFreeBuff ) == 0); //Free the current consumed buffer
     return pPort->pHead; //Return the current head of the list
 }
 #endif
@@ -266,7 +272,7 @@ int Print_LIPS( const char *fmt, ... )
 
 #if defined UART_DMA_ENABLE
     /* Note: Output will be truncated to allowed max size */
-    pNewBuff = _alloc_box(pPort->pBuffPool);
+    pNewBuff = osPoolAlloc(pPort->pBuffPool);
     ASF_assert( pNewBuff != NULL );
     pPrintBuff = M_GetBuffStart(pNewBuff);
     if (pPrintBuff != NULL)
@@ -334,7 +340,7 @@ int _dprintf( uint8_t dbgLvl, const char *fmt, ... )
 
 #ifdef UART_DMA_ENABLE
             /* Note: Output will be truncated to allowed max size */
-            pNewBuff = _alloc_box(pPort->pBuffPool);
+            pNewBuff = osPoolAlloc(pPort->pBuffPool);
             ASF_assert( pNewBuff != NULL );
             if (pNewBuff != NULL)
             {

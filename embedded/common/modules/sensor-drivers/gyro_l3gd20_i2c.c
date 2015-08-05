@@ -38,7 +38,7 @@
 /*-------------------------------------------------------------------------------------------------*\
  |    P R I V A T E   C O N S T A N T S   &   M A C R O S
 \*-------------------------------------------------------------------------------------------------*/
-#define delay_ms(msec)      os_dly_wait(MSEC_TO_TICS(msec))
+#define delay_ms(msec)      osDelay(msec)
 
 /*-------------------------------------------------------------------------------------------------*\
  |    P R I V A T E   T Y P E   D E F I N I T I O N S
@@ -288,7 +288,7 @@ void Gyro_TriggerDataAcq( void )
  *          Waits until data is ready to be read
  *
  ***************************************************************************************************/
-void Gyro_WaitDataReady( U16 timeOut )
+void Gyro_WaitDataReady( uint16_t timeOut )
 {
     /* Not used in this manner */
 }

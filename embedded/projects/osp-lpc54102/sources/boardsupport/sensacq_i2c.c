@@ -271,7 +271,7 @@ void dev_i2c_delay(unsigned int msec)
 	/* Will WFI for the entire sleep duration. If an interrupt
 	   occurs that wakes the device, the sleep handler will
 	   automatically re-enter WFI until the duration has expired. */
-	os_dly_wait(MSEC_TO_TICS(msec)); /* Allow startup time for sensors */
+	osDelay(msec); /* Allow startup time for sensors */
 }
 
 /**

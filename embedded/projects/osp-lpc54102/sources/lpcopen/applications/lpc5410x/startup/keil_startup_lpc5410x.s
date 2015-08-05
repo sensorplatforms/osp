@@ -35,7 +35,7 @@
 
 ; original stack size was set to 0x200
 				EXPORT  Stack_Size
-Stack_Size      EQU     0x00000400
+Stack_Size      EQU     0x00000200
 	
 				EXPORT  Stack_Mem
                 AREA    STACK, NOINIT, READWRITE, ALIGN=3
@@ -48,7 +48,7 @@ __initial_sp
 ; </h>
 
 ; Original heap size was set to 0x100
-Heap_Size       EQU     0x00006000
+Heap_Size       EQU     0x100
 
                 AREA    HEAP, NOINIT, READWRITE, ALIGN=3
 __heap_base

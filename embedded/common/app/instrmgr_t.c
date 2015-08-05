@@ -33,8 +33,6 @@ extern uint32_t gStackSize;
 
 extern const AsfTaskInitDef C_gAsfTaskInitTable[NUMBER_OF_TASKS];
 extern uint32_t gSystemRTCRefTime;
-extern struct OS_TCB os_idle_TCB; //RTX internal
-extern void *os_active_TCB[];     //RTX internal
 
 extern void InitializeTasks( void );
 extern uint8_t GetTaskList( uint8_t **pTaskList );
@@ -111,6 +109,7 @@ ASF_TASK void InstrManagerTask( ASF_TASK_ARG )
 
             }
         }
+        ASFDeleteMessage( INSTR_MANAGER_TASK_ID, &rcvMsg );
     }
 }
 

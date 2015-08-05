@@ -54,7 +54,8 @@
 #if 0
 #define MAX_SYSTEM_MESSAGES                     1200     ///< Max number of queued messages in the system
 #else
-#define MAX_SYSTEM_MESSAGES                     600    // QLY change from 600 to 300    ///< Max number of queued messages in the system
+/* PG: Reduced the number of queued messages to 200 to prevent memory wastage. */
+#define MAX_SYSTEM_MESSAGES                     200    // QLY change from 600 to 300    ///< Max number of queued messages in the system
 #endif
 /* All timer references (arbitrary unique identifiers for each timer)*/
 #define TIMER_REF_RTC_UPDATE                    0x55A5
@@ -96,7 +97,7 @@
 /* Sensor acquisition related definitions */
 
 #if !defined INTERRUPT_BASED_SAMPLING
-# define SENSOR_SAMPLE_PERIOD           MSEC_TO_TICS(20)   //tick
+# define SENSOR_SAMPLE_PERIOD           (20)   //time in ms
 # define MAG_DECIMATE_FACTOR            1
 # define ACCEL_SAMPLE_DECIMATE          1
 # define GYRO_SAMPLE_DECIMATE           1
@@ -106,7 +107,7 @@
 # define GYRO_SAMPLE_DECIMATE           1
 #endif
 
-#define	PRESSURE_SAMPLE_PERIOD		MSEC_TO_TICS(40)
+#define	PRESSURE_SAMPLE_PERIOD		(40)
 
 #ifdef TRIGGERED_MAG_SAMPLING
 # define MAG_TRIGGER_RATE_DECIMATE      1 //1/2 of Accel ODR

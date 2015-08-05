@@ -43,7 +43,7 @@ extern uint32_t AccelTimeExtend;
 /*-------------------------------------------------------------------------------------------------*\
  |    P R I V A T E   C O N S T A N T S   &   M A C R O S
 \*-------------------------------------------------------------------------------------------------*/
-#define delay_ms(msec)      os_dly_wait(MSEC_TO_TICS(msec))
+#define delay_ms(msec)      osDelay(msec))
 #define PORT_ACCIRQREQ                  4
 #define PIN_ACCIRQREQ                   11
 #define ACCEL_INT_IRQCh                 PIN_INT0_IRQn

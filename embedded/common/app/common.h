@@ -32,8 +32,6 @@
 /*-------------------------------------------------------------------------------------------------*\
  |    C O N S T A N T S   &   M A C R O S
 \*-------------------------------------------------------------------------------------------------*/
-#define OS_WAIT_NEVER                           0x00    ///< Zero wait as defined by RTX
-#define OS_WAIT_FOREVER                         0xFFFF  ///< Wait forever as defined by RTX
 #define TIMER_SYS_ID                            0xC0DEFEEDUL
 
 /* Critical Section Locks */
@@ -130,7 +128,7 @@ typedef enum AppResultCodesTag
 
 typedef struct AsfTimerTag
 {
-    TimerId         timerId;   /**< Id of the timer - internal use    */
+    osTimerId       timerId;   /**< Id of the timer - internal use    */
     TaskId          owner;     /**< Owner task that created the timer */
     uint16_t        ticks;     /**< Timeout value in system ticks     */
     uint16_t        userValue; /**< User defined value                */
@@ -146,7 +144,7 @@ typedef osp_bool_t (*fpInputValidate_t)(uint8_t);
 /* UART  driver data structure */
 typedef struct PortInfoTag
 {
-    uint32_t       *pBuffPool;
+    osPoolId       pBuffPool;
 #ifdef UART_DMA_ENABLE
     void           *pHead;
     void           *pTail;
@@ -228,7 +226,8 @@ void put_u32(const uint32_t);
 void _ASFTimerStart( TaskId owner, uint16_t ref, uint16_t tick, AsfTimer *pTimer, char *_file, int _line  );
 osp_bool_t ASFTimerStarted ( AsfTimer *pTimer );
 void _ASFKillTimer( AsfTimer *pTimer, char *_file, int _line );
-void _ASFTimerExpiry ( uint16_t info, char *_file, int _line );
+void _ASFTimerExpiry ( uint32_t info, char *_file, int _line );
+void ASFTimerCallback(void const *argument);
 void AsfInitialiseTasks ( void );
 
 /* User instrumentation hooks */
