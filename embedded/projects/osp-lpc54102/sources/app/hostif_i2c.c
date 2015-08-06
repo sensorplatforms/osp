@@ -28,13 +28,13 @@
  * copyright, permission, and disclaimer notice must appear in all copies of
  * this code.
  */
-#include "board.h"
 #include <string.h>
 #include <stdint.h>
 #include "sensorhub.h"
 #include "hostif.h"
 #include "osp-types.h"
 #include "common.h"
+#include "pinmap.h"
 /*****************************************************************************
  * Private types/enumerations/variables
  ****************************************************************************/
@@ -55,6 +55,9 @@ typedef struct __HOSTIF_Ctrl_t {
 	uint8_t *txBuff_next;
 	uint16_t txLength_next;
 } Hostif_Ctrl_t;
+
+/* Host Interface Pin. Making it global since it is used in multiple places */
+gpio_t hostifIrq = {ENCODE_PORT_PIN(HOSTIF_IRQ_PORT,HOSTIF_IRQ_PIN)};
 
 static Hostif_Ctrl_t g_hostif;
 
@@ -275,8 +278,8 @@ void Hostif_Init(void)
     memset(&g_hostif, 0, sizeof(Hostif_Ctrl_t));
 
     /* Setup I2C pin mux */
-    Chip_IOCON_PinMuxSet(LPC_IOCON, 0, 27, (IOCON_FUNC1 | IOCON_DIGITAL_EN));  /* i2c2 */
-    Chip_IOCON_PinMuxSet(LPC_IOCON, 0, 28, (IOCON_FUNC1 | IOCON_DIGITAL_EN));  /* I2C2 */
+    pin_function( ENCODE_PORT_PIN((uint8_t)Port_0, (uint8_t)Pin_27), (PINMAP_FUNC1 | PINMAP_DIGITAL_EN));
+    pin_function( ENCODE_PORT_PIN((uint8_t)Port_0, (uint8_t)Pin_28), (PINMAP_FUNC1 | PINMAP_DIGITAL_EN));
 
     Chip_Clock_EnablePeriphClock(I2C_HOSTIF_CLK);
     Chip_SYSCON_PeriphReset(I2C_HOSTIF_RST);
@@ -320,12 +323,12 @@ void Hostif_Init(void)
 	ROM_I2CS_Transfer(hI2C, &i2cXfer);
     
     /* init host interrupt pin */
-    Chip_GPIO_SetPinDIROutput(LPC_GPIO, HOSTIF_IRQ_PORT, HOSTIF_IRQ_PIN);
-    
+    gpio_dir(&hostifIrq,PIN_OUTPUT);
+ 
     /* de-assert interrupt line to high to indicate Host/AP that 
      * there is no data to receive
      */
-    Chip_GPIO_SetPinState(LPC_GPIO, HOSTIF_IRQ_PORT, HOSTIF_IRQ_PIN, 1);
+    gpio_write(&hostifIrq,1);
     
     /* Enable the interrupt for the I2C */
 	NVIC_SetPriority(I2C_HOSTIF_IRQn, HOSTIF_IRQ_PRIORITY);

@@ -80,9 +80,10 @@
 #include "sensorhub.h"
 #include "common.h"
 #include "acc_common.h"
-#include "board.h"
 #include "osp-sensors.h"
 #include "sensacq_i2c.h"
+#include "gpio_api.h"
+#include "gpio_irq_api.h"
 
 /* user defined code to be added here ... */
 static bma2x2_t *p_bma2x2;
@@ -122,23 +123,24 @@ static void accel_activate(bool enable)
 }
 void Accel_HardwareSetup(osp_bool_t enable)
 {
+    gpio_t hostifIrq;
+    gpio_irq_t gpioIrq;
 	/* ACCEL INT1 irq setup */
 	NVIC_DisableIRQ(ACCEL_PINT_IRQn);
 	NVIC_SetPriority(ACCEL_PINT_IRQn, SENSOR_IRQ_PRIORITY);
-	Chip_GPIO_SetPinDIRInput(LPC_GPIO, ACCEL_INT_PORT, ACCEL_INT_PIN);
+    hostifIrq.pin = ENCODE_PORT_PIN(ACCEL_INT_PORT, ACCEL_INT_PIN);
+    gpio_dir(&hostifIrq,PIN_INPUT);
 
-    Chip_INMUX_PinIntSel(ACCEL_PINT_SEL, ACCEL_INT_PORT, ACCEL_INT_PIN);
+    gpioIrq.irq_index = ACCEL_PINT_CH;
+    gpioIrq.event = IRQ_EDGE_RISE;
+    gpio_irq_init(&gpioIrq, ENCODE_PORT_PIN(ACCEL_INT_PORT, ACCEL_INT_PIN), NULL, ACCEL_PINT_SEL);
 
-    
-	Chip_PININT_SetPinModeEdge(LPC_PININT, ACCEL_PINT_CH);	/* edge sensitive and rising edge interrupt */
-	Chip_PININT_EnableIntHigh(LPC_PININT, ACCEL_PINT_CH);
-
-	//Chip_GPIO_SetPinDIRInput(LPC_GPIO, ACCEL_INT2_PORT, ACCEL_INT2_PIN);
+    hostifIrq.pin = ENCODE_PORT_PIN(ACCEL_INT2_PORT, ACCEL_INT2_PIN);
+    gpio_dir(&hostifIrq,PIN_INPUT);
 
     Chip_SYSCON_EnableWakeup(ACCEL_WAKE); /* enable to wake from sleep */
 	
-    //Chip_PININT_ClearIntStatus(LPC_PININT, ACCEL_PINT_CH);
-    
+    //gpio_irq_disable(&gpioIrq);
    
 }
 void Accel_Initialize(AccelInitOption option)
@@ -221,7 +223,9 @@ void Accel_ReadData(MsgAccelData *accelData )
 
 void ACCEL_IRQHandler(void)
 {
+    gpio_irq_t gpioIrq;
 	uint32_t currTime = GetCurrentTime();
+    gpioIrq.irq_index = ACCEL_PINT_CH;
 #if 0
 	uint32_t currTime = g_Timer.GetCurrent();
 	PhysicalSensor_t* pSens = g_phySensors[PHYS_ACCEL_ID];
@@ -230,10 +234,10 @@ void ACCEL_IRQHandler(void)
 	
 	pSens->irq_pending++;
 	
-	Chip_PININT_ClearIntStatus(LPC_PININT, ACCEL_PINT_CH);
+    gpio_irq_disable(&gpioIrq);
 	ResMgr_IRQDone();
 #else
-	Chip_PININT_ClearIntStatus(LPC_PININT, ACCEL_PINT_CH);
+    gpio_irq_disable(&gpioIrq);
 	SendDataReadyIndication(ACCEL_INPUT_SENSOR, currTime);
 #endif
 }
