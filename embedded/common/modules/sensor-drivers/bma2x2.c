@@ -84,6 +84,7 @@
 #include "sensacq_i2c.h"
 #include "gpio_api.h"
 #include "gpio_irq_api.h"
+#include "rtc_api.h"
 
 /* user defined code to be added here ... */
 static bma2x2_t *p_bma2x2;
@@ -224,7 +225,7 @@ void Accel_ReadData(MsgAccelData *accelData )
 void ACCEL_IRQHandler(void)
 {
     gpio_irq_t gpioIrq;
-	uint32_t currTime = GetCurrentTime();
+    uint32_t currTime = rtc_read();
     gpioIrq.irq_index = ACCEL_PINT_CH;
 #if 0
 	uint32_t currTime = g_Timer.GetCurrent();

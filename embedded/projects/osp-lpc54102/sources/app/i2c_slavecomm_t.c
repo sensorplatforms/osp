@@ -31,6 +31,7 @@
 #include "MQErrorCodes.h"
 #include "osp_i2c_map.h"
 #include "algorithm-api.h"    //Algorithm API to subscribe sensor result
+#include "rtc_api.h"
 
 #define HIF_PACKET_SIZE	M_CalcBufferSize(sizeof(HostIFPackets_t))
 
@@ -260,7 +261,7 @@ static int FastData_add(volatile struct FastData *FD, Buffer_t *pHIFPkt)
 	memcpy(DB->DataChunk + DB->length, &(pHIFPkt->DataStart), pHIFPkt->Header.Length);
 	DB->length += pHIFPkt->Header.Length;
 	DB->state++;
-	curTime = GetCurrentTime();
+    curTime = rtc_read();
 
 	if (lastTimeStamp != 0) {
 		if ((curTime - lastTimeStamp) > 1000) {
