@@ -18,12 +18,12 @@
 /*---------------------------------------------------------------------*\
  |    I N C L U D E   F I L E S
 \*---------------------------------------------------------------------*/
-#include "board.h"
 #include "common.h"
 #include "hw_setup.h"
 #include "sensorhub.h"
 #include <string.h>
 #include "romapi_uart.h"
+#include "serial_api.h"
 
 
 /*---------------------------------------------------------------------*\
@@ -47,10 +47,6 @@ uint32_t	g_logging = 0x00;
 /* Use a buffer size larger than the expected return value of
    uart_get_mem_size() for the static UART handle type */
 //static uint32_t uartHandleMEM[0x10];
-
-/* UART Driver context memory */
-#define RAMBLOCK_H          60
-static uint32_t  uartHandleMem[RAMBLOCK_H];
 
 /* UART ROM Driver Handle */
 static UART_HANDLE_T *hUART;
@@ -78,6 +74,8 @@ volatile uint32_t tx_done, rx_done;
  |    S T A T I C   V A R I A B L E S   D E F I N I T I O N S
 \*---------------------------------------------------------------------*/
 
+serial_t uart0;
+
 /*---------------------------------------------------------------------*\
  |    F O R W A R D   F U N C T I O N   D E C L A R A T I O N S
 \*---------------------------------------------------------------------*/
@@ -91,7 +89,6 @@ static void errorUART(void)
 	Board_LED_Set(1, true);
 	while (1) {}
 }
-#endif 
 
 /* UART Pin mux function - note that SystemInit() may already setup your
    pin muxing at system startup */
@@ -108,302 +105,33 @@ static void UART_PinMuxSetup(void)
 #warning "No UART PIN/CLK setup for this example"
 #endif    
 }
+#endif
 
-/* Initialize the UART ROM Driver */
-static int uartrom_init(void)
+/* This is board specific, need to move to hardware specific file. */
+static const uint8_t ledBits[] = {29, 30, 31};
+
+void Board_LED_Init(void)
 {
-	int sz;
+    int i;
 
-	UART_PinMuxSetup();
-
-	sz =  ROM_UART_GetMemSize();
-
-	if (RAMBLOCK_H < (sz / 4)) {
-		while (1) {}
-	}
-
-	hUART = ROM_UART_Init(uartHandleMem, LPC_USART0_BASE, 0);
-
-	return 0;
+    /* Pin muxing setup as part of board_sysinit */
+    for (i = 0; i < sizeof(ledBits); i++) 
+    {
+        Chip_GPIO_SetPinDIROutput(LPC_GPIO, 0, ledBits[i]);
+        Chip_GPIO_SetPinState(LPC_GPIO, 0, ledBits[i], true);
+    }
 }
-
-#define ABS(x) ((int) (x) < 0 ? -(x) : (x))
-/* Configure UART ROM Driver and pripheral */
-static int uartrom_config(void)
-{
-	UART_CFG_T cfg;
-	UART_BAUD_T baud;
-
-	/* Set up baudrate parameters */
-	baud.clk = Chip_Clock_GetAsyncSyscon_ClockRate();	/* Clock frequency */
-	baud.baud = UART_BAUD_RATE;	/* Required baud rate */
-	baud.ovr = 0;	/* Set the oversampling to the recommended rate */
-	baud.mul = baud.div = 0;
-
-	if (ROM_UART_CalBaud(&baud) != LPC_OK) {
-		/* Unable to calculate the baud rate parameters */
-		while (1) {}
-	}
-
-	/* Set fractional control register */
-	Chip_SYSCON_SetUSARTFRGCtrl(baud.mul, 255);
-
-	/* See if the calculated baud is < +/- UART_BUAD_ERR% of the required baud */
-	if (ABS(baud.baud - UART_BAUD_RATE) > (UART_BAUD_RATE * UART_BUAD_ERR) / 100) {
-		/* WARNING: Baud rate is has more than UART_BUAD_ERR percentage */
-		/* Try to auto-detect the Oversampling rate by setting baud.ovr to 0 */
-		while (1) {}
-	}
-
-	/* Configure the UART */
-	cfg.cfg = UART_CFG_8BIT | UART_CFG_BRKRX;
-	cfg.div = baud.div;	/* Use the calculated div value */
-	cfg.ovr = baud.ovr;	/* Use oversampling rate from baud */
-	cfg.res = UART_BIT_DLY(UART_BAUD_RATE);
-
-	/* Configure the UART */
-	ROM_UART_Configure(hUART, &cfg);
-	NVIC_ClearPendingIRQ(UART0_IRQn);
-	NVIC_EnableIRQ(UART0_IRQn);
-
-	return 0;
-}
-
-
-/* UART ROM error handler */
-static void uartrom_error(UART_HANDLE_T hUART, uint32_t err)
-{
-	switch (err) {
-	case UART_ERROR_FRAME:
-		/* No stop bit in uart frame; mismatched baud(?) or incorrect/short BREAK condition(?) */
-		Board_LED_Set(0, 1);
-		break;
-
-	case UART_ERROR_PARITY:
-		/* Parity error; mismatched baud(?) */
-		while (1) {}
-
-	case UART_ERROR_AUTOBAUD:
-		/* Autobaud timeout error */
-		while (1) {}
-
-	case UART_ERROR_OVERRUN:
-		/* Uart received character before ROM_UART_Receive() is called */
-		Board_LED_Set(1, 1);
-		break;
-
-	case UART_ERROR_RXNOISE:
-		/* Typically problem is with the baud rate and or Over sampling count */
-		while (1) {}
-
-	default:
-		/* Control will never reach this */
-		break;
-	}
-}
-
-/* UART ROM event handler */
-static void uartrom_event(UART_HANDLE_T hUART, uint32_t evt)
-{
-	switch (evt) {
-	case UART_EVENT_BREAK:
-		Board_LED_Set(2, 1);		/* TURN ON LED_2 when BREAK is received on RX line */
-		break;
-
-	case UART_EVENT_NOBREAK:
-		Board_LED_Set(2, 0);		/* TURN OFF LED_2 when RX comes out of break */
-		break;
-
-	case UART_EVENT_TXIDLE:
-		/* Can be used for flow control */
-		/* This will be called when the TX shift register is done with
-		   sending the last bit to uart line; event will be called only
-		   after calling ROM_UART_SetCtrl(hUART, UART_TXIDLE_ON), event
-		   can be turned off using ROM_UART_SetCtrl(hUART, UART_TXIDLE_OFF)
-		 */
-		break;
-
-	case UART_EVENT_TXPAUSED:
-		/* Event will happen after ROM_UART_SetCtrl(hUART, UART_TX_PAUSE) is
-		   called. This event does not mean the the TX is idle, meaning, the
-		   TX holding register might contain data (which is not loaded into
-		   TX shift register anymore) and the the TX shift register is done
-		   sending the data that it was sending when UART_TX_PAUSE was called.
-		 */
-		/* Can be used to implement flow control or safely send BREAK signal
-		   without createing frame errors in the currently transmitted data
-		 */
-		break;
-
-	case UART_EVENT_CTSHI:
-		/* CTS line went from Low to High */
-		/* Could be used for flow control or RS-485 implementations */
-		break;
-
-	case UART_EVENT_CTSLO:
-		/* CTS line went from High to Low */
-		/* Could be used for flow control or RS-485 implementations */
-		break;
-
-	default:
-		while (1) {}	/* Control will never reach here */
-	}
-}
-
-/* Call-back handler for error/event */
-static void uartrom_xfer_errevt(UART_HANDLE_T hUART, UART_EVENT_T evt, void *arg)
-{
-	uint32_t val = (uint32_t) arg;
-	if (evt == UART_EV_ERROR) {
-		uartrom_error(hUART, val);
-	}
-	else if (evt == UART_EV_EVENT) {
-		uartrom_event(hUART, val);
-	}
-	else {
-		while (1) {}/* Control will never reach this */
-
-	}
-}
-
-/* UART Transfer done */
-static void uartrom_xfer_done(UART_HANDLE_T hUART, UART_EVENT_T evt, void *arg)
-{
-	UART_DATA_T *dat = (UART_DATA_T *) arg;
-
-	switch (evt) {
-	case UART_TX_DONE:
-		tx_done = 1;
-		break;
-
-	case UART_RX_DONE:
-		rx_done = dat->count;
-		break;
-
-	default:
-		while (1) {}	/* Control will never reach here */
-	}
-}
-
-/* UART transfer start */
-static void uartrom_xfer_start(UART_HANDLE_T hUART, UART_EVENT_T evt, void *arg)
-{
-	UART_DATA_T *dat = (UART_DATA_T *) arg;
-
-	(void) *dat;
-	switch (evt) {
-	case UART_TX_START:
-		/* Transmit of new buffer started */
-		break;
-
-	case UART_RX_START:
-		/* Receive of data started; can be used to implement timer logic */
-		break;
-
-	default:
-		while (1) {}	/* Control will never reach here */
-	}
-}
-
-static void uartrom_rx_prog(UART_HANDLE_T hUART, UART_EVENT_T evt, void *arg)
-{
-	UART_DATA_T *dat = (UART_DATA_T *) arg;
-
-	switch (evt) {
-	case UART_RX_INPROG:
-		break;
-
-	case UART_RX_NOPROG:
-		/* In case of frame error restart xfer */
-		if (dat->state == UART_ST_ERRFRM) {
-			dat->offset = 0;
-			dat->state = UART_ST_BUSY;
-		}
-		else {
-			/* If the received frame has errors don't stop just restart */
-			ROM_UART_SetCtrl(hUART, UART_RX_STOP);
-		}
-		break;
-
-	default:
-		break;		/* Control should never reach here */
-	}
-}
-
-/* Register call-backs */
-static void uartrom_regcb(void)
-{
-	ROM_UART_RegisterCB(hUART, UART_CB_START, uartrom_xfer_start);	/* Start of transfer */
-	ROM_UART_RegisterCB(hUART, UART_CB_DONE, uartrom_xfer_done);/* End of transfer */
-	ROM_UART_RegisterCB(hUART, UART_CB_ERREVT, uartrom_xfer_errevt);/* Error/Event callbacks */
-	ROM_UART_RegisterCB(hUART, UART_CB_RXPROG, uartrom_rx_prog);/* Receive progress callback */
-}
-
-
-
-#if 0 
-/* Setup UART handle and parameters */
-static void setupUART()
-{
-	uint32_t frg_mult;
-
-	/* 4*115.2KBPS, 8N1, ASYNC mode, no errors, clock filled in later */
-	UART_CONFIG_T cfg = {
-		0,				/* U_PCLK frequency in Hz */
-		115200*4,		/* Baud Rate in Hz */
-		1,				/* 8N1 */
-		0,				/* Asynchronous Mode */
-		NO_ERR_EN	/* Enable No Errors */
-	};
-
-	/* Perform a sanity check on the storage allocation */
-	if (LPC_UARTD_API->uart_get_mem_size() > sizeof(uartHandleMEM)) {
-		/* Example only: this should never happen and probably isn't needed for
-		   most UART code. */
-		errorUART();
-	}
-
-	/* Setup the UART handle */
-	uartHandle = LPC_UARTD_API->uart_setup((uint32_t) LPC_USART0, (uint8_t *) &uartHandleMEM);
-	if (uartHandle == NULL) {
-		errorUART();
-	}
-
-	/* Need to tell UART ROM API function the current UART peripheral clock
-	     speed */
-	cfg.sys_clk_in_hz = Chip_Clock_GetAsyncSysconClockRate();
-
-	/* Initialize the UART with the configuration parameters */
-	frg_mult = LPC_UARTD_API->uart_init(uartHandle, &cfg);
-	if (frg_mult) {
-		Chip_Clock_EnableAsyncPeriphClock(ASYNC_SYSCTL_CLOCK_FRG);
-		Chip_SYSCTL_SetUSARTFRGCtrl(frg_mult, 0xFF);
-	}    
-}
-#endif 
 
 /* Send a string on the UART terminated by a NULL character using
    polling mode. */
 void putLineUART(const char *send_data)
 {
-#if 0
-	UART_PARAM_T param;
+    unsigned int index = 0;
 
-	param.buffer = (uint8_t *) send_data;
-	param.size = strlen(send_data);
-
-	/* Polling mode, do not append CR/LF to sent data */
-	param.transfer_mode = TX_MODE_SZERO;
-	param.driver_mode = DRIVER_MODE_POLLING;
-
-	/* Transmit the data */
-	if (LPC_UARTD_API->uart_put_line(uartHandle, &param)) {
-		while(0) errorUART();
-	}
-#else 
-    //ROM_UART_Send(hUART, send_data, sizeof(send_data) - 1);
-    Board_UARTPutSTR((char*)send_data);
-#endif 
+    for (index = 0; index < strlen(send_data); index++) 
+    {
+        serial_putc(&uart0, send_data[index]);
+    } 
 }
 
 void put_u32(uint32_t v)
@@ -732,9 +460,27 @@ int main(void)
     
     /* Update core clock variables */
     SystemCoreClockUpdate();
+
+    /* board init does LED, UART and clock init. 
+     * Moving peripheral clock init and LED init here. */
+    /* INMUX and IOCON are used by many apps, enable both INMUX and IOCON clock bits here. */
+    Chip_Clock_EnablePeriphClock(SYSCON_CLOCK_INPUTMUX);
+    Chip_Clock_EnablePeriphClock(SYSCON_CLOCK_IOCON);
     
-    /* Initialize the pinmux and clocking per board connections */
-    Board_Init();
+    /* Initialize GPIO */
+    Chip_GPIO_Init(LPC_GPIO);
+    
+    Chip_PININT_Init(LPC_PININT);
+
+        
+    /* Initialize the LEDs. Be careful with below routine, once it's called some of the I/O will be set to output. */
+    Board_LED_Init();
+
+    uart0.baudrate = DEBUGBAUDRATE;
+    uart0.databits = UART_CFG_8BIT;
+    uart0.serial_num = SERIAL_LPC_0;
+
+    serial_init(&uart0,0,0);
 
     // So we know main() is running     
     D0_printf("%s started\r\n", __FUNCTION__);
