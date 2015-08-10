@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#define I2C_DRIVER                  /* Include I2C Driver */
 #if !defined (I2C_DRIVER_H)
 #define   I2C_DRIVER_H
 
