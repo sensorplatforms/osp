@@ -363,7 +363,7 @@
             <useXO>0</useXO>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>INTERNAL_FLASH,BOARD_NXP_LPCXPRESS0_54102,PWRROMD_PRESENT,__FPU_PRESENT=1,CORE_M4,ANDROID_DEMO,DEBUG_BUILD,DEBUG_OUTPUT,ASF_PROFILING,ON_DEMAND_PROFILING</Define>
+              <Define>INTERNAL_FLASH,BOARD_NXP_LPCXPRESS0_54102,PWRROMD_PRESENT,__FPU_PRESENT=1,CORE_M4,ANDROID_DEMO,DEBUG_BUILD,DEBUG_OUTPUT,ASF_PROFILING,ON_DEMAND_PROFILING,DEVICE_INTERRUPTIN=1</Define>
               <Undefine></Undefine>
               <IncludePath>..\..\..\..\include;..\..\..\common\app;..\..\..\common\asf;..\..\..\common\alg;..\sources\app;..\sources\config;..\sources\boardsupport;..\..\..\common\modules\sensor-drivers;..\..\..\common\modules\bus-drivers;..\..\..\..\external\rtos\rtx\inc;..\..\..\..\external\rtos\rtx\cm;..\sources\lpcopen\software\lpc_core\lpc_board\boards_5410x\lpcxpresso_54102;..\sources\lpcopen\software\lpc_core\lpc_chip\chip_5410x;..\sources\lpcopen\software\lpc_core\lpc_chip\chip_common;..\sources\lpcopen\software\lpc_core\lpc_chip\chip_5410x\config;..\sources\lpcopen\software\lpc_core\lpc_board\board_common;..\sources\HostInterface;..\..\..\..\include\hal;..\..\..\..\targets\TARGET_LPC54102</IncludePath>
             </VariousControls>
@@ -500,6 +500,25 @@
               <FileName>RTX_CM4_IFX.lib</FileName>
               <FileType>4</FileType>
               <FilePath>C:\Keil_v5\ARM\RL\RTX\CM4F_LE_IFX\RTX_CM4_IFX.lib</FilePath>
+              <FileOption>
+                <CommonProperty>
+                  <UseCPPCompiler>2</UseCPPCompiler>
+                  <RVCTCodeConst>0</RVCTCodeConst>
+                  <RVCTZI>0</RVCTZI>
+                  <RVCTOtherData>0</RVCTOtherData>
+                  <ModuleSelection>0</ModuleSelection>
+                  <IncludeInBuild>0</IncludeInBuild>
+                  <AlwaysBuild>2</AlwaysBuild>
+                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
+                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
+                  <PublicsOnly>2</PublicsOnly>
+                  <StopOnExitCode>11</StopOnExitCode>
+                  <CustomArgument></CustomArgument>
+                  <IncludeLibraryModules></IncludeLibraryModules>
+                  <ComprImg>1</ComprImg>
+                </CommonProperty>
+                <FileArmAds/>
+              </FileOption>
             </File>
           </Files>
         </Group>
