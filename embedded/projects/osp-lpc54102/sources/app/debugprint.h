@@ -26,10 +26,80 @@
 /*-------------------------------------------------------------------------------------------------*\
  |    C O N S T A N T S   &   M A C R O S
 \*-------------------------------------------------------------------------------------------------*/
+#ifdef DEBUG_BUILD
+# ifndef DEBUG_OUTPUT
+# define DEBUG_OUTPUT
+# endif
+#endif
+    
+    /* Printf and assert support for debugging */
+#ifdef DEBUG_OUTPUT
+# define DEBUG_LVL      1
+#else
+# ifndef DEBUG_LVL
+#  define DEBUG_LVL     0
+# endif
+#endif
+    
+#if (DEBUG_LVL > 0)
+# ifdef UART_DMA_ENABLE
+#  define MAX_DPRINTF_MESSAGES                  30  ///< Max printf messages allowed at a given time
+# else
+#  define TX_BUFFER_SIZE                        512
+# endif
+# define RX_BUFFER_SIZE                         32
+# define DPRINTF_BUFF_SIZE                      200
+    
+#else //DEBUG_LVL = 0
+    
+# ifndef UART_DMA_ENABLE
+#  define TX_BUFFER_SIZE                        512
+# endif
+# define RX_BUFFER_SIZE                         200
+# define MAX_DPRINTF_MESSAGES                   10   ///< Max printf messages allowed at a given time
+# define DPRINTF_BUFF_SIZE                      100
+    
+#endif
 
 /*-------------------------------------------------------------------------------------------------*\
  |    T Y P E   D E F I N I T I O N S
 \*-------------------------------------------------------------------------------------------------*/
+/* UART  driver data structure */
+typedef struct PortInfoTag
+{
+    osPoolId       pBuffPool;
+#ifdef UART_DMA_ENABLE
+    void           *pHead;
+    void           *pTail;
+    fpDmaEnables_t EnableDMATxRequest;
+    fpDmaEnables_t EnableDMAxferCompleteInt;
+    fpDmaEnables_t EnableDMAChannel;
+    fpInputValidate_t   ValidateInput;
+    uint32_t       UartBaseAddress;
+    DMA_Channel_TypeDef *DMAChannel;
+#else
+    /** Circular transmit buffer:
+     *   txWriteIdx is the next slot to write to
+     *   txReadIdx  is the last slot read from
+     *   txWriteIdx == txReadIdx == buffer is full
+     *   txWriteIdx == 1 + txReadIdx == buffer is empty
+     */
+    uint8_t      txBuffer[TX_BUFFER_SIZE];
+    uint16_t     txWriteIdx;               /**< Updated by task.   */
+    uint16_t     txReadIdx;                /**< Updated by TX ISR. */
+#endif
+    /** Circular receive buffer:
+     *   rxWriteIdx is the next slot to write to
+     *   rxReadIdx  is the last slot read from
+     *   rxWriteIdx == rxReadIdx == buffer is full
+     *   rxWriteIdx == 1 + rxReadIdx == buffer is empty
+     */
+    uint8_t      rxBuffer[RX_BUFFER_SIZE];
+    uint16_t     rxWriteIdx;               /**< Updated by RX ISR. */
+    uint16_t     rxReadIdx;                /**< Updated by task.   */
+    TaskId       rcvTask;                  /**< Task waiting for receive */
+
+} PortInfo;
 
 /*-------------------------------------------------------------------------------------------------*\
  |    E X T E R N A L   V A R I A B L E S   &   F U N C T I O N S
