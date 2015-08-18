@@ -51,6 +51,12 @@ void WaitForHostSync(void);
 static AsfTimer sSensorTimer = NULL_TIMER;
 #endif
 static AsfTimer sPressureTimer = NULL_TIMER;
+
+/*  This flag prevents data-ready messeges to be sent until
+ *  Sensor Acquisition task is ready
+ */
+static uint8_t sTskRdyFlag = 0;
+
 /*-------------------------------------------------------------------*\
  |    F O R W A R D   F U N C T I O N   D E C L A R A T I O N S
 \*-------------------------------------------------------------------*/
@@ -333,18 +339,25 @@ void SensorControlCmdHandler(MsgSensorControlData *pData)
 void SendDataReadyIndication(uint8_t sensorId, uint32_t timeStamp)
 {
     MessageBuffer *pSendMsg = NULLP;
-    if (ASFCreateMessage(MSG_SENSOR_DATA_RDY,
-            sizeof(MsgSensorDataRdy), &pSendMsg) == ASF_OK) {
-        pSendMsg->msg.msgSensorDataRdy.sensorId = sensorId;
-        pSendMsg->msg.msgSensorDataRdy.timeStamp = timeStamp;
-
-        if ( ASFSendMessage(SENSOR_ACQ_TASK_ID, pSendMsg) != ASF_OK ) {
-            D0_printf("Error sending sensoracq message for senosr id %d\r\n", sensorId);
+/* Do not send a message until sensor acquisition task is ready */
+    if (0 != sTskRdyFlag){
+        if (ASFCreateMessage(MSG_SENSOR_DATA_RDY,
+                sizeof(MsgSensorDataRdy), &pSendMsg) == ASF_OK) {
+            pSendMsg->msg.msgSensorDataRdy.sensorId = sensorId;
+            pSendMsg->msg.msgSensorDataRdy.timeStamp = timeStamp;
+            
+            if ( ASFSendMessage(SENSOR_ACQ_TASK_ID, pSendMsg) != ASF_OK ) {
+                D0_printf("Error sending sensoracq message for senosr id %d\r\n", sensorId);           
+            }        
+        } else {
+            D0_printf("Error creating sensoracq message for sensor id %d\r\n", sensorId);
         }
-    } else {
-        D0_printf("Error creating sensoracq message for sensor id %d\r\n", sensorId);
     }
-
+/* Mag interrupt needs to be explicitly cleaned after the interrupt is read/ignored */
+    else if(sensorId == MAG_INPUT_SENSOR)
+    {
+        Mag_ClearDataInt();
+    }
 }
 
 /*******************************************************************
@@ -370,7 +383,7 @@ ASF_TASK void SensorAcqTask(ASF_TASK_ARG)
     volatile uint8_t  i;
 
 #ifndef WAIT_FOR_HOST_SYNC
-    os_dly_wait(MSEC_TO_TICS(50)); /* Allow startup time for sensors */
+    osDelay(50);
 #else
     WaitForHostSync(); //This also allows for startup time for sensors
 #endif
@@ -417,6 +430,8 @@ ASF_TASK void SensorAcqTask(ASF_TASK_ARG)
 
     /* Magnetometer sensor does not re-generate interrupt if its outputs are not read. */
     Mag_ClearDataInt();
+    /* Indicate sensor init done */
+    sTskRdyFlag = 1;
 
     while (1) {
         ASFReceiveMessage(SENSOR_ACQ_TASK_ID, &rcvMsg);
@@ -450,6 +465,7 @@ ASF_TASK void SensorAcqTask(ASF_TASK_ARG)
             D2_printf("SensorAcqTask:!!!UNHANDLED MESSAGE:%d!!!\r\n", rcvMsg->msgId);
             break;
         }
+        ASFDeleteMessage( SENSOR_ACQ_TASK_ID, &rcvMsg );
     }
 }
 

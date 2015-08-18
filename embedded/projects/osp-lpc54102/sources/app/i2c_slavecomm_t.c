@@ -717,6 +717,7 @@ ASF_TASK void I2CCommTask(ASF_TASK_ARG)
 			D1_printf("I2C:!!!UNHANDLED MESSAGE:%d!!!\r\n", rcvMsg->msgId);
 			break;
         }
+        ASFDeleteMessage(I2CSLAVE_COMM_TASK_ID, &rcvMsg );
     }
 }
 #endif //ANDROID_COMM_TASK

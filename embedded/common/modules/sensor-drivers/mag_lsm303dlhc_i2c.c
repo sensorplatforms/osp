@@ -35,7 +35,7 @@ extern AsfTaskHandle ossTaskHandleTable[];
 /*-------------------------------------------------------------------------------------------------*\
  |    P R I V A T E   C O N S T A N T S   &   M A C R O S
 \*-------------------------------------------------------------------------------------------------*/
-#define delay_ms(msec)          os_dly_wait(MSEC_TO_TICS(msec))
+#define delay_ms(msec)      osDelay(msec))
 
 /*-------------------------------------------------------------------------------------------------*\
  |    P R I V A T E   T Y P E   D E F I N I T I O N S

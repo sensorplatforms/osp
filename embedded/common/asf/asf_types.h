@@ -22,7 +22,7 @@
  |    I N C L U D E   F I L E S
 \*-------------------------------------------------------------------------------------------------*/
 #include <stdint.h>
-#include "rtl.h"
+#include "cmsis_os.h"
 
 /*-------------------------------------------------------------------------------------------------*\
  |    C O N S T A N T S   &   M A C R O S
@@ -35,7 +35,8 @@
  * Task Handle type. This type is OS-dependent.
  */
 typedef struct AsfTaskHandleTag {
-    OS_TID   handle;
+    osThreadId  posThreadId;
+    osMailQId   posMailQId;
     void     *pStack;
     uint16_t stkSize;
 } AsfTaskHandle;
@@ -43,13 +44,12 @@ typedef struct AsfTaskHandleTag {
 /*
  * Semaphore ID type. This type is OS-dependent.
  */
-typedef OS_SEM* AsfSemIdType;
+#define AsfSemIdType(sem) osSemaphoreDef(sem)
 
 /*
  * Timer ID type. This type is OS-dependent.
  */
-typedef OS_ID TimerId;
-
+typedef osTimerId TimerId;
 
 /*-------------------------------------------------------------------------------------------------*\
  |    E X T E R N A L   V A R I A B L E S   &   F U N C T I O N S

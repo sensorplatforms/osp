@@ -51,13 +51,13 @@
 */
 /* Declare all ASF tasks here */
 /* This task creates other tasks and OS resources and must always be present */
-ASF_TASK_STATIC ( INSTR_MANAGER_TASK_ID,  InstrManagerTask,   50,  0x800,    4 )
+ASF_TASK_STATIC ( INSTR_MANAGER_TASK_ID,  InstrManagerTask,   osPriorityNormal,  0x200,    4 )
 #if 0
 /* Handles command input from UART */
-ASF_TASK_STATIC ( CMD_HNDLR_TASK_ID,      CmdHandlerTask,     92,  0x800,    4 )
+ASF_TASK_STATIC ( CMD_HNDLR_TASK_ID,      CmdHandlerTask,     osPriorityNormal,  0x800,    4 )
 #endif
 /* Sensor data handler task */
-ASF_TASK_STATIC ( SENSOR_ACQ_TASK_ID,     SensorAcqTask,      95, 0x800,   64 )
+ASF_TASK_STATIC ( SENSOR_ACQ_TASK_ID,     SensorAcqTask,      osPriorityAboveNormal, 0x400,   64 )
 
 /* Additional tasks specific to application is defined in App_Tasks.h */
 #include "app_tasks.h"
