@@ -111,34 +111,34 @@ typedef uint32_t PinName;
 typedef int32_t PinMode;
 
 typedef enum {
-    PINMAP_FUNC0 = 0x0,             /*!< Selects pin function 0 */
-    PINMAP_FUNC1 = 0x1,             /*!< Selects pin function 1 */
-    PINMAP_FUNC2 = 0x2,             /*!< Selects pin function 2 */
-    PINMAP_FUNC3 = 0x3,             /*!< Selects pin function 3 */
-    PINMAP_FUNC4 = 0x4,             /*!< Selects pin function 4 */
-    PINMAP_FUNC5 = 0x5,             /*!< Selects pin function 5 */
-    PINMAP_FUNC6 = 0x6,             /*!< Selects pin function 6 */
-    PINMAP_FUNC7 = 0x7             /*!< Selects pin function 7 */
+    PINMAP_FUNC0 = 0x0,				/*!< Selects pin function 0 */
+    PINMAP_FUNC1 = 0x1,				/*!< Selects pin function 1 */
+    PINMAP_FUNC2 = 0x2,				/*!< Selects pin function 2 */
+    PINMAP_FUNC3 = 0x3,				/*!< Selects pin function 3 */
+    PINMAP_FUNC4 = 0x4,				/*!< Selects pin function 4 */
+    PINMAP_FUNC5 = 0x5,				/*!< Selects pin function 5 */
+    PINMAP_FUNC6 = 0x6,				/*!< Selects pin function 6 */
+    PINMAP_FUNC7 = 0x7				/*!< Selects pin function 7 */
 } PINMAP_FUNC;
 
 typedef enum{
-    PINMAP_MODE_INACT    = (0x0 << 3),      /*!< No addition pin function */
-    PINMAP_MODE_PULLDOWN = (0x1 << 3),      /*!< Selects pull-down function */
-    PINMAP_MODE_PULLUP   = (0x2 << 3),      /*!< Selects pull-up function */
-    PINMAP_MODE_REPEATER = (0x3 << 3)      /*!< Selects pin repeater function */
+    PINMAP_MODE_INACT    = (0x0 << 3),		/*!< No addition pin function */
+    PINMAP_MODE_PULLDOWN = (0x1 << 3),		/*!< Selects pull-down function */
+    PINMAP_MODE_PULLUP   = (0x2 << 3),		/*!< Selects pull-up function */
+    PINMAP_MODE_REPEATER = (0x3 << 3)		/*!< Selects pin repeater function */
 } PINMAP_MODE;
 
-#define PINMAP_HYS_EN            (0x1 << 5)     /*!< Enables hysteresis */
-#define PINMAP_GPIO_MODE         (0x1 << 5)     /*!< GPIO Mode */
-#define PINMAP_I2C_SLEW          (0x1 << 5)     /*!< I2C Slew Rate Control */
-#define PINMAP_INV_EN            (0x1 << 6)     /*!< Enables invert function on input */
-#define PINMAP_ANALOG_EN         (0x0 << 7)     /*!< Enables analog function by setting 0 to bit 7 */
-#define PINMAP_DIGITAL_EN        (0x1 << 7)     /*!< Enables digital function by setting 1 to bit 7(default) */
-#define PINMAP_STDI2C_EN         (0x1 << 8)     /*!< I2C standard mode/fast-mode */
-#define PINMAP_FASTI2C_EN        (0x3 << 8)     /*!< I2C Fast-mode Plus and high-speed slave */
-#define PINMAP_INPFILT_OFF       (0x1 << 8)     /*!< Input filter Off for GPIO pins */
-#define PINMAP_INPFILT_ON        (0x0 << 8)     /*!< Input filter On for GPIO pins */
-#define PINMAP_OPENDRAIN_EN      (0x1 << 10)    /*!< Enables open-drain function */
+#define PINMAP_HYS_EN            (0x1 << 5)		/*!< Enables hysteresis */
+#define PINMAP_GPIO_MODE         (0x1 << 5)		/*!< GPIO Mode */
+#define PINMAP_I2C_SLEW          (0x1 << 5)		/*!< I2C Slew Rate Control */
+#define PINMAP_INV_EN            (0x1 << 6)		/*!< Enables invert function on input */
+#define PINMAP_ANALOG_EN         (0x0 << 7)		/*!< Enables analog function by setting 0 to bit 7 */
+#define PINMAP_DIGITAL_EN        (0x1 << 7)		/*!< Enables digital function by setting 1 to bit 7(default) */
+#define PINMAP_STDI2C_EN         (0x1 << 8)		/*!< I2C standard mode/fast-mode */
+#define PINMAP_FASTI2C_EN        (0x3 << 8)		/*!< I2C Fast-mode Plus and high-speed slave */
+#define PINMAP_INPFILT_OFF       (0x1 << 8)		/*!< Input filter Off for GPIO pins */
+#define PINMAP_INPFILT_ON        (0x0 << 8)		/*!< Input filter On for GPIO pins */
+#define PINMAP_OPENDRAIN_EN      (0x1 << 10)		/*!< Enables open-drain function */
 
 #ifdef __cplusplus
 }

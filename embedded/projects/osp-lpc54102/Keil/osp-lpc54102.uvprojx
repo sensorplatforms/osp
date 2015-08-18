@@ -1048,9 +1048,24 @@
           <GroupName>TARGET_LPC54102</GroupName>
           <Files>
             <File>
-              <FileName>i2c_api.c</FileName>
+              <FileName>gpio_api.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\targets\TARGET_LPC54102\i2c_api.c</FilePath>
+              <FilePath>..\..\..\..\targets\TARGET_LPC54102\gpio_api.c</FilePath>
+            </File>
+            <File>
+              <FileName>gpio_irq_api.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\targets\TARGET_LPC54102\gpio_irq_api.c</FilePath>
+            </File>
+            <File>
+              <FileName>pinmap.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\targets\TARGET_LPC54102\pinmap.c</FilePath>
+            </File>
+            <File>
+              <FileName>rtc_api.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\targets\TARGET_LPC54102\rtc_api.c</FilePath>
             </File>
           </Files>
         </Group>

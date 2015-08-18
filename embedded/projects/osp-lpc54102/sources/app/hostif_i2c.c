@@ -58,6 +58,9 @@ typedef struct __HOSTIF_Ctrl_t {
 	uint16_t txLength_next;
 } Hostif_Ctrl_t;
 
+/* Host Interface Pin. Making it global since it is used in multiple places */
+gpio_t hostifIrq = {ENCODE_PORT_PIN(HOSTIF_IRQ_PORT,HOSTIF_IRQ_PIN)};
+
 static Hostif_Ctrl_t g_hostif;
 static i2c_t slave_i2c_handle;
 
@@ -234,12 +237,12 @@ void Hostif_Init(void)
     i2c_slave_mode(&slave_i2c_handle,1);
 
     /* init host interrupt pin */
-    Chip_GPIO_SetPinDIROutput(LPC_GPIO, HOSTIF_IRQ_PORT, HOSTIF_IRQ_PIN);
-    
+    gpio_dir(&hostifIrq,PIN_OUTPUT);
+ 
     /* de-assert interrupt line to high to indicate Host/AP that 
      * there is no data to receive
      */
-    Chip_GPIO_SetPinState(LPC_GPIO, HOSTIF_IRQ_PORT, HOSTIF_IRQ_PIN, 1);
+    gpio_write(&hostifIrq,1);
     
     /* Enable the interrupt for the I2C */
 	NVIC_SetPriority(I2C_HOSTIF_IRQn, HOSTIF_IRQ_PRIORITY);

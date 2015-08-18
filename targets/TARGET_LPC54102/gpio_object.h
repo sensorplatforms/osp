@@ -27,69 +27,39 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************
  */
-#ifndef OBJECTS_H
-#define OBJECTS_H
+#ifndef GPIO_OBJECT_H
+#define GPIO_OBJECT_H
 
 #include "common.h"
 #include "PortNames.h"
-//#include "PeripheralNames.h"
 #include "PinNames.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct gpio_irq_s {
-    IRQn_Type irq_n;
-    uint32_t irq_index;
-    uint32_t event;
-};
-
-struct port_s {
-    PortName port;
+typedef struct {
+    PinName  pin;
     uint32_t mask;
-    PinDirection direction;  
     __IO uint32_t *reg_in;
-    __IO uint32_t *reg_out;
-};
+    __IO uint32_t *reg_set;
+    __IO uint32_t *reg_clr;
+} gpio_t;
 
-struct analogin_s {
-//    ADCName adc;
-    PinName pin;
-};
+static __inline void gpio_write(gpio_t *obj, int value) {
+    ASF_assert(obj->pin != (PinName)NC);
+    Chip_GPIO_SetPinState(LPC_GPIO, DECODE_PORT(obj->pin), DECODE_PIN(obj->pin), (bool)value);
+}
 
-struct serial_s {
-//    UARTName uart;
-    int index; // Used by irq
-    uint32_t baudrate;
-    uint32_t databits;
-    uint32_t stopbits;
-    uint32_t parity; 
-};
+static __inline int gpio_read(gpio_t *obj) {
+    ASF_assert(obj->pin != (PinName)NC);
+    return (Chip_GPIO_GetPinState(LPC_GPIO, DECODE_PORT(obj->pin), DECODE_PIN(obj->pin)));
+}
 
-struct spi_s {
-//    SPIName spi;
-    uint32_t bits;
-    uint32_t cpol;
-    uint32_t cpha;
-    uint32_t mode;
-    uint32_t nss;
-    uint32_t br_presc;
-};
-
-struct i2c_s {
-//    I2CName  i2c;
-    uint32_t  i2c; //TBD: DUMMY - Please remove
-};
-
-struct pwmout_s {
-//    PWMName pwm;
-    PinName pin;
-    uint32_t period;
-    uint32_t pulse;
-};
-
-#include "gpio_object.h"
+static __inline int gpio_is_connected(const gpio_t *obj) {
+    //return obj->pin != (PinName)NC;
+    return 0;
+}
 
 #ifdef __cplusplus
 }

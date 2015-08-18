@@ -27,72 +27,45 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************
  */
-#ifndef OBJECTS_H
-#define OBJECTS_H
-
+#include <stddef.h>
 #include "common.h"
-#include "PortNames.h"
-//#include "PeripheralNames.h"
-#include "PinNames.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "gpio_irq_api.h"
+#include "pinmap.h"
 
-struct gpio_irq_s {
-    IRQn_Type irq_n;
-    uint32_t irq_index;
-    uint32_t event;
-};
 
-struct port_s {
-    PortName port;
-    uint32_t mask;
-    PinDirection direction;  
-    __IO uint32_t *reg_in;
-    __IO uint32_t *reg_out;
-};
+int gpio_irq_init(gpio_irq_t *obj, PinName pin, gpio_irq_handler handler, uint32_t id) {
 
-struct analogin_s {
-//    ADCName adc;
-    PinName pin;
-};
-
-struct serial_s {
-//    UARTName uart;
-    int index; // Used by irq
-    uint32_t baudrate;
-    uint32_t databits;
-    uint32_t stopbits;
-    uint32_t parity; 
-};
-
-struct spi_s {
-//    SPIName spi;
-    uint32_t bits;
-    uint32_t cpol;
-    uint32_t cpha;
-    uint32_t mode;
-    uint32_t nss;
-    uint32_t br_presc;
-};
-
-struct i2c_s {
-//    I2CName  i2c;
-    uint32_t  i2c; //TBD: DUMMY - Please remove
-};
-
-struct pwmout_s {
-//    PWMName pwm;
-    PinName pin;
-    uint32_t period;
-    uint32_t pulse;
-};
-
-#include "gpio_object.h"
-
-#ifdef __cplusplus
+    ASF_assert(pin != NC);
+    Chip_INMUX_PinIntSel(id, DECODE_PORT(pin), DECODE_PIN(pin));
+    gpio_irq_enable(obj);
+    return 0;
 }
-#endif
 
-#endif
+void gpio_irq_enable(gpio_irq_t *obj) {
+    switch(obj->event){
+        case IRQ_EDGE_RISE:
+            Chip_PININT_SetPinModeEdge(LPC_PININT, obj->irq_index); /* edge sensitive */
+            Chip_PININT_EnableIntHigh(LPC_PININT, obj->irq_index);  /* Rising edge interrupt */
+            break;
+        case IRQ_EDGE_FALL:
+            Chip_PININT_SetPinModeEdge(LPC_PININT, obj->irq_index); /* Edge sensitive */
+            Chip_PININT_EnableIntLow(LPC_PININT, obj->irq_index);   /* Falling edge interrupt */
+            break;
+        case IRQ_LEVEL_HIGH:
+            Chip_PININT_SetPinModeLevel(LPC_PININT, obj->irq_index); /* Level sensitive */
+            Chip_PININT_EnableIntHigh(LPC_PININT, obj->irq_index);   /* High level interrupt */
+            break;
+        case IRQ_LEVEL_LOW:
+            Chip_PININT_SetPinModeLevel(LPC_PININT, obj->irq_index); /* Level sensitive */
+            Chip_PININT_EnableIntLow(LPC_PININT, obj->irq_index);    /* Low level interrupt */
+            break;
+        default:
+            D1_printf("GPIO_IRQ_ENABLE: Bad IRQ Mode: %d\r\n", obj->irq_index);
+            while(1){};
+    }        
+}
+
+void gpio_irq_disable(gpio_irq_t *obj) {
+	Chip_PININT_ClearIntStatus(LPC_PININT, obj->irq_index);
+}

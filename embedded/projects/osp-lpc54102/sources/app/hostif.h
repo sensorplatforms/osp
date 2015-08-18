@@ -33,10 +33,13 @@
 #define _HOSTIF_H_
 
 #include "spi-sensor-hub-priv.h"
+#include "gpio_api.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+extern gpio_t hostifIrq;
 
 /** @defgroup SH_HOSTIF : Sensor hub host interface
  * @ingroup SENSOR_HUB
@@ -65,7 +68,7 @@ void Hostif_StartTx(uint8_t *pBuf, uint16_t size, int magic);
  */
 static INLINE void Hostif_AssertIRQ(void) 
 {
-	Chip_GPIO_SetPinState(LPC_GPIO, HOSTIF_IRQ_PORT, HOSTIF_IRQ_PIN, 0);
+    gpio_write(&hostifIrq,0);
 }
 
 /**
@@ -74,7 +77,7 @@ static INLINE void Hostif_AssertIRQ(void)
  */
 static INLINE void Hostif_DeassertIRQ(void) 
 {
-	Chip_GPIO_SetPinState(LPC_GPIO, HOSTIF_IRQ_PORT, HOSTIF_IRQ_PIN, 1);
+    gpio_write(&hostifIrq,1);
 }
 
 /**
@@ -83,7 +86,7 @@ static INLINE void Hostif_DeassertIRQ(void)
  */
 static INLINE bool Hostif_IRQActive(void) 
 {
-	return (Chip_GPIO_GetPinState(LPC_GPIO, HOSTIF_IRQ_PORT, HOSTIF_IRQ_PIN) == false);
+    return (gpio_read(&hostifIrq) == false);
 }
 
 /**
