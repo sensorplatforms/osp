@@ -26,6 +26,7 @@
 #include "osp-api.h"
 #include "osp-sensors.h"
 #include "sensacq_i2c.h"
+#include "rtc_api.h"
 
 /*-------------------------------------------------------------------*\
  |    E X T E R N A L   V A R I A B L E S   &   F U N C T I O N S
@@ -80,7 +81,7 @@ static void HandleTimers(MsgTimerExpiry *pTimerExp)
         ASFTimerStart(SENSOR_ACQ_TASK_ID, TIMER_REF_PRESSURE_READ,
                 PRESSURE_SAMPLE_PERIOD, &sPressureTimer);
 
-        timeStamp = GetCurrentTime();
+        timeStamp = rtc_read();
         SensorDataHandler(PRESSURE_INPUT_SENSOR, timeStamp);
         break;
 #ifndef INTERRUPT_BASED_SAMPLING

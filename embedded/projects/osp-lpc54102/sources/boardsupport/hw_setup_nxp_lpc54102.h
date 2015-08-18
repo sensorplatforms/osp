@@ -33,8 +33,8 @@
 /* #    T I M I N G S                                                     # */
 /* ######################################################################## */
 /** System clock & tick configuration */
-#define SYSTEM_CLOCK_FREQ                       84000000  //Make sure this matches the settings in system_stm32f10x.c
-#define USEC_PER_TICK                           10000       ///< (in uS) = 200Hz
+#define SYSTEM_CLOCK_FREQ                       84000000  //high-performance mode (CPU @84MHz)
+#define USEC_PER_TICK                           10000     ///< (in uS) = 100Hz
 #define TICS_PER_SEC                            ((uint32_t)(1000000/USEC_PER_TICK))
 #define MSEC_PER_TICK                           ((uint32_t)(USEC_PER_TICK/1000))
 
