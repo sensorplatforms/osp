@@ -185,12 +185,8 @@ void i2c_init(i2c_t *obj, PinName sda, PinName scl)
         ROM_I2CS_INIT_T i2csInit;
 
         /* Setup I2C pin mux */
-        Chip_IOCON_PinMuxSet(LPC_IOCON, 0, sda, (IOCON_FUNC1 | IOCON_DIGITAL_EN));
-        Chip_IOCON_PinMuxSet(LPC_IOCON, 0, scl, (IOCON_FUNC1 | IOCON_DIGITAL_EN));
-#if 0 //The below functionality has been tested, need to enabled after merging the pinmap HAL files
-        pin_function( sda, (PINMAP_FUNC1 | PINMAP_DIGITAL_EN));
-        pin_function( scl, (PINMAP_FUNC1 | PINMAP_DIGITAL_EN));
-#endif
+        pin_function( ENCODE_PORT_PIN((uint8_t)Port_0, (uint8_t)Pin_27), (PINMAP_FUNC1 | PINMAP_DIGITAL_EN));
+        pin_function( ENCODE_PORT_PIN((uint8_t)Port_0, (uint8_t)Pin_28), (PINMAP_FUNC1 | PINMAP_DIGITAL_EN));
         memSize = ROM_I2CS_GetMemSize();
         if ( memSize > sizeof(devMem) ) 
         {

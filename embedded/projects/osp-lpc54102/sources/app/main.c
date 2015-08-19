@@ -107,16 +107,17 @@ static void UART_PinMuxSetup(void)
 
 /* This is board specific, need to move to hardware specific file. */
 static const uint8_t ledBits[] = {29, 30, 31};
-
 void Board_LED_Init(void)
 {
     int i;
+    gpio_t ledIrq;
 
     /* Pin muxing setup as part of board_sysinit */
     for (i = 0; i < sizeof(ledBits); i++) 
     {
-        Chip_GPIO_SetPinDIROutput(LPC_GPIO, 0, ledBits[i]);
-        Chip_GPIO_SetPinState(LPC_GPIO, 0, ledBits[i], true);
+        ledIrq.pin = ENCODE_PORT_PIN(0,ledBits[i]);
+        gpio_dir(&ledIrq,PIN_OUTPUT);
+        gpio_write(&ledIrq,true);
     }
 }
 

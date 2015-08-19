@@ -28,7 +28,6 @@
  * copyright, permission, and disclaimer notice must appear in all copies of
  * this code.
  */
-#include "board.h"
 #include <string.h>
 #include <stdint.h>
 #include "sensorhub.h"
