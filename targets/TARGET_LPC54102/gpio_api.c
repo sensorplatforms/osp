@@ -32,6 +32,15 @@
 #include "Gpio_object.h"
 
 void gpio_init(gpio_t __attribute__((unused)) *obj, PinName __attribute__((unused)) pin) {
+
+    /* Moving peripheral clock init and LED init here. */
+    /* INMUX and IOCON are used by many apps, enable both INMUX and IOCON clock bits here. */
+    Chip_Clock_EnablePeriphClock(SYSCON_CLOCK_INPUTMUX);
+    Chip_Clock_EnablePeriphClock(SYSCON_CLOCK_IOCON);
+    
+    /* Initialize GPIO */
+    Chip_GPIO_Init(LPC_GPIO);
+    
     Chip_PININT_Init(LPC_PININT);
 }
 

@@ -201,18 +201,9 @@ int main(void)
     /* Update core clock variables */
     SystemCoreClockUpdate();
 
-    /* board init does LED, UART and clock init. 
-     * Moving peripheral clock init and LED init here. */
-    /* INMUX and IOCON are used by many apps, enable both INMUX and IOCON clock bits here. */
-    Chip_Clock_EnablePeriphClock(SYSCON_CLOCK_INPUTMUX);
-    Chip_Clock_EnablePeriphClock(SYSCON_CLOCK_IOCON);
-    
-    /* Initialize GPIO */
-    Chip_GPIO_Init(LPC_GPIO);
-    
-    Chip_PININT_Init(LPC_PININT);
+    /* Initialize GPIO pin interrupt module */
+    gpio_init((gpio_t *)NULL,(PinName)NULL);
 
-        
     /* Initialize the LEDs. Be careful with below routine, once it's called some of the I/O will be set to output. */
     Board_LED_Init();
 
@@ -229,9 +220,6 @@ int main(void)
     Board_LED_Set(1, false);
     Board_LED_Set(2, false);
     
-    /* Initialize GPIO pin interrupt module */
-    gpio_init((gpio_t *)NULL,(PinName)NULL);
-        
     rtc_init();
    
     gpio_dir(&hostifIrq,PIN_OUTPUT);
