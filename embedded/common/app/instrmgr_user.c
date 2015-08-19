@@ -28,12 +28,24 @@ extern uint16_t os_time;               //RTX internal
 /*-------------------------------------------------------------------------------------------------*\
  |    P U B L I C   V A R I A B L E S   D E F I N I T I O N S
 \*-------------------------------------------------------------------------------------------------*/
+/* RTC clock */
+typedef struct RtcClockTag
+{
+    uint16_t hours;
+    uint8_t  minutes;
+    uint8_t  seconds;
+    uint16_t msec;
+} RtcClock_t;
+
 RtcClock_t gRtcClockData;
 
 /*-------------------------------------------------------------------------------------------------*\
  |    P R I V A T E   C O N S T A N T S   &   M A C R O S
 \*-------------------------------------------------------------------------------------------------*/
 #define	INSTR_MGR_SAMPLE_PERIOD (1000)	//This is currently unused
+/* All timer references (arbitrary unique identifiers for each timer)*/
+#define TIMER_REF_RTC_UPDATE                    (0x55A5)
+
 /*-------------------------------------------------------------------------------------------------*\
  |    P R I V A T E   T Y P E   D E F I N I T I O N S
 \*-------------------------------------------------------------------------------------------------*/

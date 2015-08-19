@@ -24,7 +24,7 @@
 #include <stdio.h>
 #include "hw_setup.h"
 #include "asf_msgstruct.h"
-#include "main.h"
+//#include "main.h"
 #include "osp-types.h"
 #include "asf_types.h"
 #include "osp-version.h"
@@ -32,12 +32,25 @@
 /*-------------------------------------------------------------------------------------------------*\
  |    C O N S T A N T S   &   M A C R O S
 \*-------------------------------------------------------------------------------------------------*/
+#ifdef ANDROID_DEMO
+# define ANDROID_COMM_TASK              I2CSLAVE_COMM_TASK_ID
+#endif
+
 #define TIMER_SYS_ID                            0xC0DEFEEDUL
 
 /* Critical Section Locks */
 #define OS_SETUP_CRITICAL()                     int wasMasked
 #define OS_ENTER_CRITICAL()                     wasMasked = __disable_irq()
 #define OS_LEAVE_CRITICAL()                     if (!wasMasked) __enable_irq()
+
+    //#define RESET_ON_ASSERT
+    
+#ifdef RESET_ON_ASSERT
+# define SysRESET()         NVIC_SystemReset()
+#else
+# define SysRESET()         while(1)
+#endif
+
 
 #ifdef DEBUG_BUILD
 #define printf( format, ... ) do { char localbuf[128]; snprintf(localbuf, 127, format, ## __VA_ARGS__); putLineUART(localbuf); } while(0)
@@ -140,43 +153,6 @@ typedef struct AsfTimerTag
 
 typedef void (*fpDmaEnables_t)(void);
 typedef osp_bool_t (*fpInputValidate_t)(uint8_t);
-
-/* UART  driver data structure */
-typedef struct PortInfoTag
-{
-    osPoolId       pBuffPool;
-#ifdef UART_DMA_ENABLE
-    void           *pHead;
-    void           *pTail;
-    fpDmaEnables_t EnableDMATxRequest;
-    fpDmaEnables_t EnableDMAxferCompleteInt;
-    fpDmaEnables_t EnableDMAChannel;
-    fpInputValidate_t   ValidateInput;
-    uint32_t       UartBaseAddress;
-    DMA_Channel_TypeDef *DMAChannel;
-#else
-    /** Circular transmit buffer:
-     *   txWriteIdx is the next slot to write to
-     *   txReadIdx  is the last slot read from
-     *   txWriteIdx == txReadIdx == buffer is full
-     *   txWriteIdx == 1 + txReadIdx == buffer is empty
-     */
-    uint8_t      txBuffer[TX_BUFFER_SIZE];
-    uint16_t     txWriteIdx;               /**< Updated by task.   */
-    uint16_t     txReadIdx;                /**< Updated by TX ISR. */
-#endif
-    /** Circular receive buffer:
-     *   rxWriteIdx is the next slot to write to
-     *   rxReadIdx  is the last slot read from
-     *   rxWriteIdx == rxReadIdx == buffer is full
-     *   rxWriteIdx == 1 + rxReadIdx == buffer is empty
-     */
-    uint8_t      rxBuffer[RX_BUFFER_SIZE];
-    uint16_t     rxWriteIdx;               /**< Updated by RX ISR. */
-    uint16_t     rxReadIdx;                /**< Updated by task.   */
-    TaskId       rcvTask;                  /**< Task waiting for receive */
-
-} PortInfo;
 
 /* Buffers used by DMA */
 typedef unsigned long Address;

@@ -94,6 +94,7 @@
 #include "sensacq_i2c.h"
 #include "gpio_api.h"
 #include "gpio_irq_api.h"
+#include "rtc_api.h"
 
 static struct bmg160_t *p_bmg160 = NULL;
 static struct bmg160_t bmg160;
@@ -233,7 +234,7 @@ void Gyro_ReadData(MsgGyroData *gyroData)
 void GYRO_IRQHandler(void)
 {
     gpio_irq_t gpioIrq;
-	uint32_t currTime = GetCurrentTime();
+    uint32_t currTime = rtc_read();
     gpioIrq.irq_index = GYRO_PINT_CH;
 #if 0
 	PhysicalSensor_t* pSens = g_phySensors[PHYS_GYRO_ID];

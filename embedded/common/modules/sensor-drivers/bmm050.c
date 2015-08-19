@@ -95,6 +95,7 @@
 #include "sensacq_i2c.h"
 #include "gpio_api.h"
 #include "gpio_irq_api.h"
+#include "rtc_api.h"
 
 static struct bmm050 *p_bmm050;
 static struct bmm050 bmm050;
@@ -229,7 +230,7 @@ void Mag_ReadData(MsgMagData *magData)
 void MAG_IRQHandler(void)
 {
     gpio_irq_t gpioIrq;
-	uint32_t currTime = GetCurrentTime();
+    uint32_t currTime = rtc_read();
     gpioIrq.irq_index = MAG_PINT_CH;
 #if 0
 	uint32_t currTime = g_Timer.GetCurrent();
