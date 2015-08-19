@@ -27,72 +27,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************
  */
-#ifndef OBJECTS_H
-#define OBJECTS_H
+#include "gpio_api.h"
+#include "pinmap.h"
+#include "Gpio_object.h"
 
-#include "common.h"
-#include "PortNames.h"
-//#include "PeripheralNames.h"
-#include "PinNames.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-struct gpio_irq_s {
-    IRQn_Type irq_n;
-    uint32_t irq_index;
-    uint32_t event;
-};
-
-struct port_s {
-    PortName port;
-    uint32_t mask;
-    PinDirection direction;  
-    __IO uint32_t *reg_in;
-    __IO uint32_t *reg_out;
-};
-
-struct analogin_s {
-//    ADCName adc;
-    PinName pin;
-};
-
-struct serial_s {
-//    UARTName uart;
-    int index; // Used by irq
-    uint32_t baudrate;
-    uint32_t databits;
-    uint32_t stopbits;
-    uint32_t parity; 
-};
-
-struct spi_s {
-//    SPIName spi;
-    uint32_t bits;
-    uint32_t cpol;
-    uint32_t cpha;
-    uint32_t mode;
-    uint32_t nss;
-    uint32_t br_presc;
-};
-
-struct i2c_s {
-//    I2CName  i2c;
-    uint32_t  i2c; //TBD: DUMMY - Please remove
-};
-
-struct pwmout_s {
-//    PWMName pwm;
-    PinName pin;
-    uint32_t period;
-    uint32_t pulse;
-};
-
-#include "gpio_object.h"
-
-#ifdef __cplusplus
+void gpio_init(gpio_t __attribute__((unused)) *obj, PinName __attribute__((unused)) pin) {
+    Chip_PININT_Init(LPC_PININT);
 }
-#endif
 
-#endif
+void gpio_dir(gpio_t *obj, PinDirection direction) {
+    ASF_assert(obj != NULL);
+    ASF_assert(obj->pin != (PinName)NC);
+    if (direction == PIN_OUTPUT) {
+        Chip_GPIO_SetPinDIROutput(LPC_GPIO, DECODE_PORT(obj->pin), DECODE_PIN(obj->pin));
+    }
+    else { // PIN_INPUT
+        Chip_GPIO_SetPinDIRInput(LPC_GPIO, DECODE_PORT(obj->pin), DECODE_PIN(obj->pin));
+    }
+}

@@ -48,14 +48,12 @@ extern "C" {
 #define DECODE_PORT(X) (((uint32_t)(X) >> 16) & 0xF)
 #define DECODE_PIN(X)  ((uint32_t)(X) & 0xFFFF)
 
-typedef enum 
-{
+typedef enum {
     PIN_INPUT,
     PIN_OUTPUT
 } PinDirection;
 
-typedef enum 
-{
+typedef enum {
     Pin_0  = 0x00,
     Pin_1  = 0x01,
     Pin_2  = 0x02,
@@ -91,8 +89,7 @@ typedef enum
     Pin_All= 0xFFFF
 } PinNumber;
 
-typedef enum 
-{
+typedef enum {
     Port_0  = 0x00,
     Port_1  = 0x01,
     Port_2  = 0x02,
@@ -113,8 +110,7 @@ typedef uint32_t PinName;
  */
 typedef int32_t PinMode;
 
-typedef enum 
-{
+typedef enum {
     PINMAP_FUNC0 = 0x0,				/*!< Selects pin function 0 */
     PINMAP_FUNC1 = 0x1,				/*!< Selects pin function 1 */
     PINMAP_FUNC2 = 0x2,				/*!< Selects pin function 2 */
@@ -125,8 +121,7 @@ typedef enum
     PINMAP_FUNC7 = 0x7				/*!< Selects pin function 7 */
 } PINMAP_FUNC;
 
-typedef enum
-{
+typedef enum{
     PINMAP_MODE_INACT    = (0x0 << 3),		/*!< No addition pin function */
     PINMAP_MODE_PULLDOWN = (0x1 << 3),		/*!< Selects pull-down function */
     PINMAP_MODE_PULLUP   = (0x2 << 3),		/*!< Selects pull-up function */

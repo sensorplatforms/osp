@@ -71,8 +71,7 @@ extern "C" {
 #define I2C_HOSTIF_WAKE             SYSCON_STARTER_I2C2
 #define I2C_HOSTIF_CLOCK_DIV 		2	/* recommended by Noah */
 #define I2C_HOSTIF_ADDR				(0x18)
-#define I2C_HOSTIF_CLK              (SYSCON_CLOCK_I2C2)
-#define I2C_HOSTIF_RST              RESET_I2C2
+
 /** Host interface IRQ defines */
 #define HOSTIF_IRQ_PORT				0
 #define HOSTIF_IRQ_PIN				19

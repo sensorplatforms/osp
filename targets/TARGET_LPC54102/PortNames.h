@@ -34,8 +34,7 @@
 extern "C" {
 #endif
 
-typedef enum 
-{
+typedef enum {
     PortA = 0,
     PortB = 1,
     PortC = 2,

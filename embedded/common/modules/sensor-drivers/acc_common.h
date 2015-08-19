@@ -37,6 +37,8 @@ typedef enum AccelInitOptionTag
     INIT_SLEEP,
 } AccelInitOption;
 
+typedef MsgAccelData AccelData_t;
+
 /*-------------------------------------------------------------------------------------------------*\
  |    E X T E R N A L   V A R I A B L E S   &   F U N C T I O N S
 \*-------------------------------------------------------------------------------------------------*/

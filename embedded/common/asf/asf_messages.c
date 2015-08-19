@@ -34,6 +34,12 @@
 /*-------------------------------------------------------------------------------------------------*\
  |    P R I V A T E   C O N S T A N T S   &   M A C R O S
 \*-------------------------------------------------------------------------------------------------*/
+#if 0
+#define MAX_SYSTEM_MESSAGES                     1200     ///< Max number of queued messages in the system
+#else
+    /* PG: Reduced the number of queued messages to 200 to prevent memory wastage. */
+#define MAX_SYSTEM_MESSAGES                     200    // QLY change from 600 to 300    ///< Max number of queued messages in the system
+#endif
 
 /*-------------------------------------------------------------------------------------------------*\
  |    P R I V A T E   T Y P E   D E F I N I T I O N S
