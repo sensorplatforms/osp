@@ -1048,6 +1048,11 @@
           <GroupName>TARGET_LPC54102</GroupName>
           <Files>
             <File>
+              <FileName>serial_api.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\targets\TARGET_LPC54102\serial_api.c</FilePath>
+            </File>
+            <File>
               <FileName>gpio_api.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\targets\TARGET_LPC54102\gpio_api.c</FilePath>
