@@ -42,7 +42,6 @@
 
 #define SEN_ENABLE	1
 
-#undef KEIL_WORKAROUND
 static struct Results RESULTS[NUM_ANDROID_SENSOR_TYPE];
 static unsigned char dirty[NUM_ANDROID_SENSOR_TYPE];
 static SystemDescriptor_t const *sys;
@@ -54,7 +53,6 @@ static const OSP_Library_Version_t libVersion = {
 	.buildTime = __DATE__" "__TIME__
 };
 
-#ifndef KEIL_WORKAROUND
 static const uint64_t depend[NUM_ANDROID_SENSOR_TYPE] = 
 {
 	[SENSOR_ACCELEROMETER] = FLAG(SENSOR_ACCELEROMETER),
@@ -71,9 +69,6 @@ static const uint64_t depend[NUM_ANDROID_SENSOR_TYPE] =
 	[SENSOR_SIGNIFICANT_MOTION] = FLAG(SENSOR_ACCELEROMETER),
 	[SENSOR_TILT_DETECTOR] = FLAG(SENSOR_ACCELEROMETER),
 };
-#else
-static uint64_t depend[NUM_ANDROID_SENSOR_TYPE];
-#endif
 
 
 static ResultDescriptor_t * resHandles[NUM_ANDROID_SENSOR_TYPE];
@@ -170,17 +165,12 @@ static void OSPalg_EnableSensor(unsigned int sensor)
 static void ResultReadyCB(struct Results *res, int sensor)
 {
 	union {
-		Android_TriAxisPreciseData_t calaccel;
-		Android_UncalibratedTriAxisPreciseData_t uncalaccel;
-		Android_TriAxisPreciseData_t calgyro;
-		Android_UncalibratedTriAxisPreciseData_t uncalgyro;
-
-		Android_BooleanResultData_t sigmot;
-
-		Android_UncalibratedTriAxisExtendedData_t uncalmag;
+		Android_TriAxisPreciseData_t calresult;
 		Android_TriAxisExtendedData_t calmag;
+		Android_UncalibratedTriAxisPreciseData_t uncalresult;
+		Android_UncalibratedTriAxisExtendedData_t uncalmag;
+		Android_BooleanResultData_t sigmot;
 		Android_OrientationResultData_t orient;
-		Android_TriAxisPreciseData_t generic;
 		Android_RotationVectorResultData_t rotvec;
 	} r;
 
@@ -188,10 +178,10 @@ static void ResultReadyCB(struct Results *res, int sensor)
 		return;
 	switch(sensor) {
 	case SENSOR_ACCELEROMETER:
-		r.calaccel.X = Q15_to_NTPRECISE(res->ResType.result.x);
-		r.calaccel.Y = Q15_to_NTPRECISE(res->ResType.result.y);
-		r.calaccel.Z = Q15_to_NTPRECISE(res->ResType.result.z);
-		r.calaccel.TimeStamp = res->time;
+		r.calresult.X = Q15_to_NTPRECISE(res->ResType.result.x);
+		r.calresult.Y = Q15_to_NTPRECISE(res->ResType.result.y);
+		r.calresult.Z = Q15_to_NTPRECISE(res->ResType.result.z);
+		r.calresult.TimeStamp = res->time;
 		break;
 	case SENSOR_MAGNETIC_FIELD_UNCALIBRATED:
 		r.uncalmag.X = Q15_to_NTPRECISE(res->ResType.result.x);
@@ -206,16 +196,16 @@ static void ResultReadyCB(struct Results *res, int sensor)
 		r.calmag.TimeStamp = res->time;
 		break;
 	case SENSOR_GYROSCOPE_UNCALIBRATED:
-		r.uncalgyro.X = Q15_to_NTPRECISE(res->ResType.result.x);
-		r.uncalgyro.Y = Q15_to_NTPRECISE(res->ResType.result.y);
-		r.uncalgyro.Z = Q15_to_NTPRECISE(res->ResType.result.z);
-		r.uncalgyro.TimeStamp = res->time;
+		r.uncalresult.X = Q15_to_NTPRECISE(res->ResType.result.x);
+		r.uncalresult.Y = Q15_to_NTPRECISE(res->ResType.result.y);
+		r.uncalresult.Z = Q15_to_NTPRECISE(res->ResType.result.z);
+		r.uncalresult.TimeStamp = res->time;
 		break;
 	case SENSOR_GYROSCOPE:
-		r.calgyro.X = Q15_to_NTPRECISE(res->ResType.result.x);
-		r.calgyro.Y = Q15_to_NTPRECISE(res->ResType.result.y);
-		r.calgyro.Z = Q15_to_NTPRECISE(res->ResType.result.z);
-		r.calgyro.TimeStamp = res->time;
+		r.calresult.X = Q15_to_NTPRECISE(res->ResType.result.x);
+		r.calresult.Y = Q15_to_NTPRECISE(res->ResType.result.y);
+		r.calresult.Z = Q15_to_NTPRECISE(res->ResType.result.z);
+		r.calresult.TimeStamp = res->time;
 		break;
 	case SENSOR_ORIENTATION:
 		r.orient.Pitch = Q15_to_NTEXTENDED(res->ResType.euler.pitch);
@@ -227,10 +217,10 @@ static void ResultReadyCB(struct Results *res, int sensor)
 		return;
 	case SENSOR_GRAVITY:
 	case SENSOR_LINEAR_ACCELERATION:
-		r.generic.X = Q15_to_NTPRECISE(res->ResType.result.x);
-		r.generic.Y = Q15_to_NTPRECISE(res->ResType.result.y);
-		r.generic.Z = Q15_to_NTPRECISE(res->ResType.result.z);
-		r.generic.TimeStamp = res->time;
+		r.calresult.X = Q15_to_NTPRECISE(res->ResType.result.x);
+		r.calresult.Y = Q15_to_NTPRECISE(res->ResType.result.y);
+		r.calresult.Z = Q15_to_NTPRECISE(res->ResType.result.z);
+		r.calresult.TimeStamp = res->time;
 		break;
 
 	case SENSOR_ROTATION_VECTOR:
@@ -722,22 +712,6 @@ OSP_STATUS_t OSP_UnsubscribeSensorResult(ResultHandle_t ResHandle)
 OSP_STATUS_t OSP_Initialize(const SystemDescriptor_t *sysdesc)
 {
 	int i;
-
-	/* Work around for broken Keil */
-#ifdef KEIL_WORKAROUND
-#error Keil is broken.
-	depend[SENSOR_ACCELEROMETER] = FLAG(SENSOR_ACCELEROMETER);
-	depend[SENSOR_MAGNETIC_FIELD] = FLAG(SENSOR_MAGNETIC_FIELD);
-	depend[SENSOR_ORIENTATION] = FLAG(SENSOR_ACCELEROMETER)|FLAG(SENSOR_MAGNETIC_FIELD);
-	depend[SENSOR_ROTATION_VECTOR] = FLAG(SENSOR_ACCELEROMETER)|FLAG(SENSOR_MAGNETIC_FIELD);
-	depend[SENSOR_GRAVITY] = FLAG(SENSOR_ACCELEROMETER);
-	depend[SENSOR_LINEAR_ACCELERATION] = FLAG(SENSOR_ACCELEROMETER);
-	depend[SENSOR_GYROSCOPE] = FLAG(SENSOR_GYROSCOPE);
-	depend[SENSOR_PRESSURE] = FLAG(SENSOR_PRESSURE);
-	depend[SENSOR_STEP_DETECTOR] = FLAG(SENSOR_ACCELEROMETER);
-	depend[SENSOR_STEP_COUNTER] = FLAG(SENSOR_ACCELEROMETER);
-	depend[SENSOR_SIGNIFICANT_MOTION] = FLAG(SENSOR_ACCELEROMETER);
-#endif
 
 	sys = sysdesc;
 
