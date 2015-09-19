@@ -4,12 +4,6 @@
  * Apache Licensed.
  */
 
-/*
- * TODO:
- *    - Handle cal data.
- */
-
-
 #include <stdio.h>
 #include <string.h>
 #include <poll.h>
