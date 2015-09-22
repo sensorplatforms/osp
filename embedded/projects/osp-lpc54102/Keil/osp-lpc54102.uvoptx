@@ -81,8 +81,18 @@
       <Books>
         <Book>
           <Number>0</Number>
-          <Title>LPC812 LPCXpresso Board (LPC54xxx LPCXpresso)</Title>
-          <Path>http://www.nxp.com/demoboard/OM13053.html</Path>
+          <Title>LPCXpresso54102 Schematics (LPCXpresso54102)</Title>
+          <Path>C:\Keil_v5\ARM\PACK\Keil\LPC54000_DFP\1.1.0\Boards\NXP\LPCXpresso54102\Documents\LPCX54102_Schematic_RevA.pdf</Path>
+        </Book>
+        <Book>
+          <Number>1</Number>
+          <Title>LPCXpresso54102User Manual (LPCXpresso54102)</Title>
+          <Path>C:\Keil_v5\ARM\PACK\Keil\LPC54000_DFP\1.1.0\Boards\NXP\LPCXpresso54102\Documents\UM10855-om13077.pdf</Path>
+        </Book>
+        <Book>
+          <Number>2</Number>
+          <Title>LPCXpresso Board for the LPC54100 family of MCUs (LPCXpresso54102)</Title>
+          <Path>http://www.nxp.com/demoboard/OM13077.html</Path>
         </Book>
       </Books>
       <DebugOpt>
@@ -107,7 +117,7 @@
         <tRSysVw>1</tRSysVw>
         <sRunDeb>0</sRunDeb>
         <sLrtime>0</sLrtime>
-        <nTsel>1</nTsel>
+        <nTsel>12</nTsel>
         <sDll></sDll>
         <sDllPa></sDllPa>
         <sDlgDll></sDlgDll>
@@ -118,7 +128,7 @@
         <tDlgDll></tDlgDll>
         <tDlgPa></tDlgPa>
         <tIfile></tIfile>
-        <pMon>BIN\UL2CM3.DLL</pMon>
+        <pMon>BIN\CMSIS_AGDI.dll</pMon>
       </DebugOpt>
       <TargetDriverDllRegistry>
         <SetRegEntry>
@@ -144,7 +154,7 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>UL2CM3</Key>
-          <Name>-UV0891UAE -O206 -S0 -C0 -P00 -N00("ARM CoreSight SW-DP") -D00(2BA01477) -L00(0) -TO18 -TC10000000 -TP21 -TDS8007 -TDT0 -TDC1F -TIEFFFFFFFF -TIP8 -FO15 -FD2000000 -FC1000 -FN1 -FF0LPC54xxx_512.FLM -FS00 -FL080000 -FP0($$Device:LPC54102$Flash\LPC54xxx_512.FLM)</Name>
+          <Name>-UV0891UAE -O206 -S0 -C0 -P00 -N00("ARM CoreSight SW-DP") -D00(2BA01477) -L00(0) -TO18 -TC10000000 -TP21 -TDS8007 -TDT0 -TDC1F -TIEFFFFFFFF -TIP8 -FO15  -FN1 -FC1000 -FD02000000 -FF0LPC54xxx_512 -FL080000 -FS00 -FP0($$Device:LPC54102J512UK49$Flash\LPC54xxx_512.FLM)</Name>
         </SetRegEntry>
       </TargetDriverDllRegistry>
       <Breakpoint/>
@@ -196,6 +206,7 @@
       </DebugFlag>
       <LintExecutable></LintExecutable>
       <LintConfigFile></LintConfigFile>
+      <bLintAuto>0</bLintAuto>
     </TargetOption>
   </Target>
 
@@ -256,7 +267,7 @@
 
   <Group>
     <GroupName>RTOS</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -281,7 +292,7 @@
       <Focus>0</Focus>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>C:\Keil_v5\ARM\RL\RTX\CM4F_LE_IFX\RTX_CM4_IFX.lib</PathWithFileName>
+      <PathWithFileName>..\..\..\..\external\rtx\RTX_CM4_IFX.lib</PathWithFileName>
       <FilenameWithoutPath>RTX_CM4_IFX.lib</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -363,7 +374,7 @@
 
   <Group>
     <GroupName>App-Common</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -436,7 +447,7 @@
 
   <Group>
     <GroupName>App</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
