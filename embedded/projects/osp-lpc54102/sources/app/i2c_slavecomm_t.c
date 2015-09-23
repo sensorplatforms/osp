@@ -72,63 +72,110 @@ int FastData_add(volatile struct FastData *FD, Buffer_t *pHIFPkt);
 #define SH_VERSION1                 0x23
 
 static uint32_t SensorState[2];
+static uint32_t PSensorState[2];
 
 // TODO: Need to call algorithm module to subscribe the enable sensor. 
-static void SensorEnable(ASensorType_t sen)
+static void SensorEnable(ASensorType_t sen, int space)
 {
 	int v = (int)sen;
 	int set;
-
-	if (v < 32) {
-		set = (1<<v);
-		SensorState[0] |= set;
-	} else {
-		set = (1<<(v-32));
-		SensorState[1] |= set;
+	if (v & SENSOR_DEVICE_PRIVATE_BASE) {
+		space = 1;
+		v &= ~SENSOR_DEVICE_PRIVATE_BASE;
 	}
-    // Why hardcode significant motion enable ?
-	SensorState[0] |= 1 << SENSOR_SIGNIFICANT_MOTION;
+	if (space == 0) {
+		if (v < 32) {
+			set = (1<<v);
+			SensorState[0] |= set;
+		} else {
+			set = (1<<(v-32));
+			SensorState[1] |= set;
+		}
+	    // Why hardcode significant motion enable ?
+		SensorState[0] |= 1 << SENSOR_SIGNIFICANT_MOTION;
+	} else if (space == 1) {
+		if (v < 32) {
+			set = (1<<v);
+			PSensorState[0] |= set;
+		} else {
+			set = (1<<(v-32));
+			PSensorState[1] |= set;
+		}
+		sen |= SENSOR_DEVICE_PRIVATE_BASE;
+	}
 
-    /* Now subscribe to the algorithm to enable this sensor */
-    Algorithm_SubscribeSensor(sen);
-
+	/* Now subscribe to the algorithm to enable this sensor */
+	Algorithm_SubscribeSensor(sen);
 }
 
 // TODO: Need to call the algorithm to unsubscribe the sensor
-static void SensorDisable(ASensorType_t sen)
+static void SensorDisable(ASensorType_t sen, int space)
 {
 	int v = (int)sen;
 	int set;
 
-	if (v < 32) {
-		set = (1<<v);
-		SensorState[0] &= ~set;
-	} else {
-		set = (1<<(v-32));
-		SensorState[1] &= ~set;
+	if (v & SENSOR_DEVICE_PRIVATE_BASE) {
+		space = 1;
+		v &= ~SENSOR_DEVICE_PRIVATE_BASE;
+	}
+	if (space == 0) {
+		if (v < 32) {
+			set = (1<<v);
+			SensorState[0] &= ~set;
+		} else {
+			set = (1<<(v-32));
+			SensorState[1] &= ~set;
+		}
+	} else if (space == 1) {
+		if (v < 32) {
+			set = (1<<v);
+			PSensorState[0] &= ~set;
+		} else {
+			set = (1<<(v-32));
+			PSensorState[1] &= ~set;
+		}
+		sen |= SENSOR_DEVICE_PRIVATE_BASE;
 	}
 
-    // Why hardcode this sensor?
+	// Why hardcode this sensor?
 	SensorState[0] |= 1 << SENSOR_SIGNIFICANT_MOTION;
 
-    // Now un-subscribe this sensor from the algorithm 
-    Algorithm_UnsubscribeSensor(sen);   
+	// Now un-subscribe this sensor from the algorithm 
+	Algorithm_UnsubscribeSensor(sen);   
 }
 
-static int GetSensorState(ASensorType_t sen)
+static int GetSensorState(ASensorType_t sen, int space)
 {
 	int v = (int)sen;
 	int set;
-	if (v < 32) {
-        /* Standard Android sensor enum value */
-		set = (1<<v);
-		if (SensorState[0] & set) return 1;
-		return 0;
-	} else {
-        /* Private android sensor. FIXME: Need to mask out the private mask bit before apply the bit shift operation */
-		set = (1<<(v-32));
-		if (SensorState[1] & set) return 1;
-		return 0;
+
+	if (v & SENSOR_DEVICE_PRIVATE_BASE) {
+		v &= ~SENSOR_DEVICE_PRIVATE_BASE;
+		space = 1;
+	}
+
+	if (space == 0) {
+		if (v < 32) {
+       			/* Standard Android sensor enum value */
+			set = (1<<v);
+			if (SensorState[0] & set) return 1;
+			return 0;
+		} else {
+			set = (1<<(v-32));
+			if (SensorState[1] & set) return 1;
+			return 0;
+		}
+	} else if (space == 1) {
+		if (v < 32) {
+       			/* Standard Android sensor enum value */
+			set = (1<<v);
+			if (PSensorState[0] & set) return 1;
+			return 0;
+		} else {
+			set = (1<<(v-32));
+			if (PSensorState[1] & set) return 1;
+			return 0;
+		}
 	}
 }
 
@@ -339,11 +386,9 @@ static void SendSensorBoolData(ASensorType_t sensorType, MsgSensorBoolData *pMsg
 #if 0  // Result to Android is now obsoleted in new OSP API
 	sensorType = ResultToAndroidTypeMap(sensorId);     
 #endif 
-    //QUOC: Why need to check sensorType == 12? 
-	if (sensorType == 12) __ASM volatile("BKPT #01");
     
     // Do not send data if host did not activate this sensor type
-	if (GetSensorState(sensorType) == 0)
+	if (GetSensorState(sensorType, 0) == 0)
 		return;
 
 	SensorHubAssertInt();	/* Assert interrupt to host */
@@ -392,7 +437,6 @@ static void SendSensorData(ASensorType_t sensorType, MsgSensorData *pMsg)
 	pPayload = M_GetBufferDataStart(pHifPacket);
 
 //	sensorType = ResultToAndroidTypeMap(sensorId);
-//	if (sensorType == 12) __ASM volatile("BKPT #01");
 	if (GetSensorState(sensorType) == 0)
 		return;
 
@@ -475,6 +519,7 @@ uint8_t process_command(uint8_t *rx_buf, uint16_t length)
 	SensorPacketTypes_t Out;
 	int		pack_sz;
 	int		fdq;
+	static 		int space = 0;
 
 	if (length < 1) return 0;
 	cmdlog[cmdidx] = rx_buf[0];
@@ -598,14 +643,20 @@ uint8_t process_command(uint8_t *rx_buf, uint16_t length)
 		/* Host has written a packet */
 		ParseHostIntefacePkt(&Out, &rx_buf[1], length-1);
 		break;
+	case 0x1f:
+		space = 0;
+		break;
+	case 0x1e:
+		space = 1;
+		break;
 	default:
 		if (rx_buf[0] >= 0x20 && rx_buf[0] < 0x50) {
 			/* ENABLE */
-			SensorEnable((ASensorType_t)(rx_buf[0]-0x20));
+			SensorEnable((ASensorType_t)(rx_buf[0]-0x20), space);
 			D0_printf("Enable %i\r\n", rx_buf[0] - 0x20);
 		} else if (rx_buf[0] >= 0x50 && rx_buf[0] < 0x80) {
 			/* DISABLE */
-			SensorDisable((ASensorType_t)(rx_buf[0]-0x50));
+			SensorDisable((ASensorType_t)(rx_buf[0]-0x50), space);
 			D0_printf("Disable %i\r\n", rx_buf[0] - 0x50);
 		}
 		break;
