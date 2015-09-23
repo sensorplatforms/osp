@@ -69,7 +69,7 @@ int FastData_add(volatile struct FastData *FD, Buffer_t *pHIFPkt);
 \*-------------------------------------------------------------------------*/
 #define SH_WHO_AM_I                 0x54
 #define SH_VERSION0                 0x01
-#define SH_VERSION1                 0x23
+#define SH_VERSION1                 0x24
 
 static uint32_t SensorState[2];
 static uint32_t PSensorState[2];
