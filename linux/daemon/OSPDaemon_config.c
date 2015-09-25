@@ -98,6 +98,13 @@ static const char * SensorTypeMap[] = {
 	SEN_MAP(SENSOR_GEOMAGNETIC_ROTATION_VECTOR),
 	[NUM_ANDROID_SENSOR_TYPE] = NULL
 };
+static const char * SensorTypeMapP[] = {
+	SEN_MAP(PSENSOR_ACCELEROMETER_RAW),
+	SEN_MAP(PSENSOR_MAGNETIC_FIELD_RAW),
+	SEN_MAP(PSENSOR_GYROSCOPE_RAW),
+	SEN_MAP(PSENSOR_ACCELEROMETER_UNCALIBRATED),
+	[NUM_PRIVATE_SENSOR_TYPE] = NULL
+};
 
 static const char *DriverTypeMap[] = {
 	[DRIVER_INPUT] = "input",
@@ -494,12 +501,34 @@ static int proc_sensor_type(int linetype, int tag, char *val, int *taglist)
 				Output[taglist[tag]].ResultDesc.SensorType = i;
 				Output[taglist[tag]].ResultDesc.OutputRateInSeconds = 0;
 				Output[taglist[tag]].ResultDesc.OptionData = &Output[taglist[tag]];
-
 			}
 			break;
 		}
 	}
-	if (i == NUM_ANDROID_SENSOR_TYPE) {
+	if (i != NUM_ANDROID_SENSOR_TYPE) {
+		return 0;
+	}
+	for (i = 0; i < NUM_PRIVATE_SENSOR_TYPE; i++) {
+		if (SensorTypeMapP[i] == NULL) continue;
+		if (strcmp(SensorTypeMapP[i], val) == 0) {
+			DBGOUT("FOUND SENSOR: %i tag %i : %s\n", linetype, tag, SensorTypeMapP[i]);
+			if (linetype == LINE_SENSOR) {
+				taglist[tag] = sensor_count;
+				sensor_count++;
+				Sensor[taglist[tag]].sensor.SensorType = M_PSensorToAndroidBase(i);
+				Sensor[taglist[tag]].sensor.SensorName = SensorTypeMapP[i];
+			} else if (linetype == LINE_OUTPUT) {
+				taglist[tag] = output_count;
+				output_count++;
+				Output[taglist[tag]].type = M_PSensorToAndroidBase(i);
+				Output[taglist[tag]].ResultDesc.SensorType = M_PSensorToAndroidBase(i);
+				Output[taglist[tag]].ResultDesc.OutputRateInSeconds = 0;
+				Output[taglist[tag]].ResultDesc.OptionData = &Output[taglist[tag]];
+			}
+			break;
+		}
+	}
+	if (i == NUM_PRIVATE_SENSOR_TYPE) {
 		fprintf(stderr, "Bad/invalid sensor: %s\n", val);
 	}
 	return 0;
