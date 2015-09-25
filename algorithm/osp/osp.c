@@ -557,8 +557,8 @@ OSP_STATUS_t OSP_SetInputData(InputSensorHandle_t handle,
 	SensorDescriptor_t *s, **v;
 	Q15_t x, y, z;
 	int32_t rawX, rawY, rawZ;
-	int32_t xidx, yidx, zidx;
-	int32_t xs, ys, zs;
+	int32_t xidx = 0, yidx = 1, zidx = 2;
+	int32_t xs = 1, ys = 1, zs = 1;
 	int i;
 	int val[5], vallen;
 	unsigned long long ts;
