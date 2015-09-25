@@ -85,10 +85,13 @@ int OSPDaemon_driver_setup_in(struct OSPDaemon_SensorDetail *s, int count)
 
 int OSPDaemon_driver_setup_out(struct OSPDaemon_output *s, int count)
 {
+	DBG(DEBUG_DRIVER, "Calling INPUT outbound setup\n");
 	if (outmap[DRIVER_INPUT])
 		outmap[DRIVER_INPUT]->setup_out(s, count);
+	DBG(DEBUG_DRIVER, "Calling FileCSV outbound setup\n");
 	if (outmap[DRIVER_FILECSV])
 		outmap[DRIVER_FILECSV]->setup_out(s, count);
+	DBG(DEBUG_DRIVER, "Done out setup\n");
 
 	return 0;
 }

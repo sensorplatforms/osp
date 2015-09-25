@@ -263,6 +263,7 @@ static void setupiio(struct IIO_Sensor *is)
 	snprintf(dname, PATH_MAX, IIO_DEVICE_DIR"/iio:device%i/scan_elements", is->iionum);
 	
 	d = opendir(dname);
+	if (d == NULL) return;
 
 	while((dent = readdir(d)) != NULL) {
 		if (dent->d_name[0] == '.') continue;
@@ -495,12 +496,14 @@ static int OSPDaemon_iio_read(struct OSPDaemon_SensorDetail *s)
 			if (od != NULL) {
 				DBGOUT("Got data for %s\n", is->name);
 				OSPDaemon_queue_put(&s->q, od);
+				DBGOUT("Queued data for %s\n", is->name);
 			}
 			ret -= is->rec_sz;
 			used += is->rec_sz;
 		} while (ret > 0);
 	}
 
+	DBGOUT("Finish reading data for %s\n", is->name);
 	return 0;
 }
 
