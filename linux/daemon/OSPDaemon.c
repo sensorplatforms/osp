@@ -243,7 +243,6 @@ static int modifyOutput(struct OSPDaemon_output *out,
 	union {
 		int i;
 		float f;
-		
 	} conv;
 
 	if (out->format == OUT_FORMAT_INTEGER)
@@ -420,7 +419,7 @@ static int OSPDaemon_init_inbound(struct pollfd *pfd, int nfd, int start)
 {
 	int i;
 	OSP_STATUS_t oret;
-	int nstart;
+	int nstart = start;
 
 	if (sd->CalFile)
 		ReadCalData(sd->CalFile);
@@ -582,7 +581,6 @@ int main(int argc, char **argv)
 		printf("Disabling Power Management\n");
 	}
 	/* Catch SIGPIPE? */
-	/* queue_test(); */
 	/* Driver inits. Replace with linker magic? */
 	OSPDaemon_iio_init();
 	OSPDaemon_inputreader_init();
