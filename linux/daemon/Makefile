@@ -1,7 +1,7 @@
 ARMCC=arm-none-linux-gnueabi-gcc
 CC=gcc
 CFLAGS=-Wall -g -I../../include 
-LDFLAGS=-Wall -g -static
+LDFLAGS=-Wall -g 
 LIBS=-L../../algorithm/osp -lOSP
 
 
