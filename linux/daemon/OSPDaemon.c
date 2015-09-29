@@ -45,6 +45,7 @@ static OSP_STATUS_t OSPDaemon_SensorControl_cb(SensorControl_t *cmd)
 {
 	int i;
 
+	if (cmd == NULL) return OSP_STATUS_UNSPECIFIED_ERROR;
 	for (i = 0; i <sd->sensor_count; i++) {
 		if (sd->sensor[i].handle == cmd->Handle)
 			break;
@@ -84,6 +85,8 @@ static void ReadCalData(char *name)
 			close(fd);
 			return;
 		}
+		if (rec.len > MAX_CALSIZE)
+			continue;
 		if (rec.len > 1) {
 			ret = read(fd, caldata+1, rec.len-1);
 			if (ret != rec.len-1) {
@@ -92,8 +95,6 @@ static void ReadCalData(char *name)
 			}
 			caldata[0] = rec.data[0];
 		}
-		if (rec.len > MAX_CALSIZE)
-			continue;
 		/* Dispatch cal data - store in pCalibrationData */
 		for (i = 0; i < sd->sensor_count; i++) {
 			if (sd->sensor[i].sensor.SensorType == rec.sensor)
@@ -103,7 +104,6 @@ static void ReadCalData(char *name)
 			memcpy(sd->sensor[i].caldata, caldata, rec.len);
 			sd->sensor[i].sensor.pCalibrationData = sd->sensor[i].caldata;
 		}
-
 	} while(1);
 }
 
@@ -536,7 +536,8 @@ static void OSPDaemon_help(const char *name)
 int main(int argc, char **argv)
 {
 	char *confname = NULL;
-	int ar = 1;
+	int ar = 1;	
+	int quiet = 0;
 
 	if (argc > 1) {
 		do {
@@ -564,6 +565,9 @@ int main(int argc, char **argv)
 				case 'n':	/* Ignore cal file */
 					ignorecal = 1;
 					break;
+				case 'q':
+					quiet = 1;
+					break;
 				case 'v':	/* Version */
 					OSPDaemon_version();
 					exit(0);
@@ -575,10 +579,10 @@ int main(int argc, char **argv)
 	}
 	if (confname == NULL) 
 		confname = "OSPDaemon.conf";
-	printf("Reading config from %s\n", confname);
-	printf("Debug level 0x%08x\n", debug_level);
+	if (!quiet) printf("Reading config from %s\n", confname);
+	if (!quiet)  printf("Debug level 0x%08x\n", debug_level);
 	if (disablepm) {
-		printf("Disabling Power Management\n");
+		if (!quiet) printf("Disabling Power Management\n");
 	}
 	/* Catch SIGPIPE? */
 	/* Driver inits. Replace with linker magic? */
