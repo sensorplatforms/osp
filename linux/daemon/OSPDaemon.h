@@ -40,6 +40,7 @@ enum {
 };
 
 enum {
+	DRIVER_INVALID,
 	DRIVER_INPUT,
 	DRIVER_IIO,
 	DRIVER_IIOEVENT,

@@ -108,6 +108,7 @@ static const char * SensorTypeMapP[] = {
 };
 
 static const char *DriverTypeMap[] = {
+	[DRIVER_INVALID] = "invalid",
 	[DRIVER_INPUT] = "input",
 	[DRIVER_IIO] = "iio",
 	[DRIVER_IIOEVENT] = "iioevent",
