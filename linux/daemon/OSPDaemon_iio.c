@@ -60,13 +60,13 @@ static void sysfs_write_str(const char *path, const char *str)
 static void parse_type(const char *path, struct DataDesc *dd)
 {
 	FILE *f;
-	char desc[1024];
+	char desc[512];
 	char *ptr = NULL, *ptr2;
 
 	DBGOUT("Parsing %s\n", path);
 	f = fopen(path, "r");
 	if (f) {
-		ptr = fgets(desc, 1024, f);
+		ptr = fgets(desc, 512, f);
 		fclose(f);
 	}
 	if (ptr) {
@@ -165,7 +165,7 @@ static OSP_InputSensorData_t * parse_iiodata(struct IIO_Sensor *is, char *buf, i
 		int64_t sll[1];
 	} conf;
 	int val[6];
-	unsigned long long ts;
+	unsigned long long ts = 0;
 	double outval;
 
 	for (i = 0; i < MAX_AXIS; i++) {
@@ -213,6 +213,8 @@ static OSP_InputSensorData_t * parse_iiodata(struct IIO_Sensor *is, char *buf, i
 			else
 				outval = conf.ll[0];
 			break;
+		default:
+			outval = 0.0;
 		}
 #if 0
 		if (is->IIOAxis[ax].dd.shift)
@@ -279,7 +281,6 @@ static void setupiio(struct IIO_Sensor *is)
 			parse_type(fname, &is->IIOAxis[ax].dd);
 			DBGOUT("%s - %i, %i\n", fname,
 				is->IIOAxis[ax].dd.store, ax);
-			/* print_Desc(&is->IIOAxis[ax].dd); */
 		} else if (strcmp(dent->d_name + len - 3, "_en") == 0) {
 			snprintf(fname, PATH_MAX, IIO_DEVICE_DIR"/iio:device%i/scan_elements/%s", is->iionum, dent->d_name);
 			sysfs_write_val(fname, 1);
@@ -292,7 +293,7 @@ static void setupiio(struct IIO_Sensor *is)
 
 	closedir(d);
 	snprintf(fname, PATH_MAX, IIO_DEVICE_DIR"/iio:device%i/trigger/current_trigger", is->iionum);
-	printf("setting trigger name %s to %s\n", is->name, fname);
+	DBGOUT("setting trigger name %s to %s\n", is->name, fname);
 	sysfs_write_str(fname, is->name);
 	snprintf(fname, PATH_MAX, IIO_DEVICE_DIR"/iio:device%i/buffer/length", is->iionum);
 	sysfs_write_val(fname, 100);
@@ -382,7 +383,6 @@ static int OSPDaemon_iio_create(const char *name, struct IIO_Sensor *s)
 		if (s->IIOAxis[i].index >= 0) {
 			if (s->IIOAxis[i].dd.store == 0) continue;
 
-			/* print_Desc(&s->IIOAxis[i].dd); */
 			/* Make sure each group is aligned */
 			DBGOUT("1: rec_sz = %i, s->IIOAxis[i].dd.store = %i, %i,\n", rec_sz, s->IIOAxis[i].dd.store, i);
 			if (rec_sz % (s->IIOAxis[i].dd.store/8) != 0) {
@@ -415,27 +415,6 @@ static int OSPDaemon_iioevent_create(const char *name, struct IIO_Sensor *s)
 	DBGOUT("HY-DBG: %s:%i - IIOnum = %i\n", __func__, __LINE__, s->iionum);
 	s->name = name;
 
-#if 0
-	setupiio(s);
-
-	rec_sz = 0;
-	for (i = 0; i < MAX_AXIS; i++) {
-		if (s->IIOAxis[i].index >= 0) {
-			if (s->IIOAxis[i].dd.store == 0) continue;
-
-			/* print_Desc(&s->IIOAxis[i].dd); */
-			/* Make sure each group is aligned */
-			DBGOUT("1: rec_sz = %i, s->IIOAxis[i].dd.store = %i, %i,\n", rec_sz, s->IIOAxis[i].dd.store, i);
-			if (rec_sz % (s->IIOAxis[i].dd.store/8) != 0) {
-				rec_sz += ((s->IIOAxis[i].dd.store/8)-(rec_sz % (s->IIOAxis[i].dd.store/8)));
-			}
-			s->IIOAxis[i].offset = rec_sz;
-			rec_sz += s->IIOAxis[i].dd.store/8;
-			DBGOUT("2: rec_sz = %i\n", rec_sz);
-		}		
-	}
-	s->rec_sz = rec_sz;
-#endif
 	snprintf(dname, PATH_MAX, "/dev/iio:device%i", s->iionum);
 
 	fd = open(dname, O_RDONLY);
@@ -469,7 +448,6 @@ static int OSPDaemon_iio_setup(struct OSPDaemon_SensorDetail *s, int count)
 			s->fd = OSPDaemon_iioevent_create(s->name, &IIOSen[i]);
 			s->private = &IIOSen[i];
 			iiocount++;
-
 		}
 		s++;
 	}
@@ -501,6 +479,8 @@ static int OSPDaemon_iio_read(struct OSPDaemon_SensorDetail *s)
 			ret -= is->rec_sz;
 			used += is->rec_sz;
 		} while (ret > 0);
+	} else {
+		DBGOUT("Read error for fd %i (errno = %i)\n", s->fd, errno);
 	}
 
 	DBGOUT("Finish reading data for %s\n", is->name);
@@ -546,168 +526,3 @@ void OSPDaemon_iio_init(void)
 	OSPDaemon_driver_register(&IIODriver);
 	OSPDaemon_driver_register(&IIOEventDriver);
 }
-/* --------------------------------------- */
-
-#if 0
-
-#include <stdlib.h>
-#include <poll.h>
-#include <stdint.h>
-
-
-#define MAX_AXIS 	5
-#define MAX_IIO		99
-#define MAX_SENSOR	10
-
-
-enum {
-	axis_x,
-	axis_y,
-	axis_z,
-	axis_r,
-	axis_timestamp,
-	axis_invalid
-};
-
-static const char *axis_name[] = {
-	[axis_x] = "X Axis",
-	[axis_y] = "Y Axis",
-	[axis_z] = "Z Axis",
-	[axis_r] = "R Axis",
-	[axis_timestamp] = "Time Axis",
-	[axis_invalid] = "INVALID",
-};
-
-struct DataDesc {
-	int sign;
-	int size;
-	int store;
-	int shift;
-};
-
-struct IIO_SensorAxis {
-	struct DataDesc dd;
-	int index;
-	int offset;
-};
-
-
-/*
- * List all the available IIO devices and the name.
- */
-void dumpiio(void)
-{
-	int i, j;
-	FILE *f;
-	char fname[PATH_MAX];
-	char name[1024];
-
-	for (i = 0; i < MAX_IIO; i++) {
-		snprintf(fname, PATH_MAX, IIO_DEVICE_DIR"/iio:device%i/name", i);
-		fname[PATH_MAX-1] = '\0';
-		
-		f = fopen(fname, "r");
-		if (f == NULL) continue;
-		if (fgets(name, 1023, f) != NULL) {
-			name[1023] = '\0';
-			for (j = 0; j < 1024 && name[j] != '\0'; j++) {
-				if (name[j] == '\n' ||
-					name[j] == '\r') {
-					name[j] = '\0';
-					break;
-				}
-			}
-		}
-		fclose(f);
-		fprintf(stderr, "Device: %s\n", name);
-	}
-}
-
-void print_Desc(const struct DataDesc *dd)
-{
-	printf("Data: sign = %i, shift = %i, store = %i, size = %i\n",
-		dd->sign, dd->shift, dd->store, dd->size);
-}
-
-
-void unsetup_iio(struct IIO_Sensor *is, int sencount)
-{
-	int i, len;
-	char dname[PATH_MAX];
-	char fname[PATH_MAX];
-	DIR *d;
-	struct dirent *dent;
-
-	for (i = 0; i < sencount; i++) {
-		snprintf(fname, PATH_MAX, IIO_DEVICE_DIR"/iio:device%i/buffer/enable", is[i].iionum);
-		sysfs_write_val(fname, 0);
-
-
-		snprintf(dname, PATH_MAX, IIO_DEVICE_DIR"/iio:device%i/scan_elements", is[i].iionum);
-	
-		d = opendir(dname);
-
-		while((dent = readdir(d)) != NULL) {
-			if (dent->d_name[0] == '.') continue;
-			len = strlen(dent->d_name);
-			if (len < 6) continue;
-			if (strcmp(dent->d_name + len - 3, "_en") == 0) {
-				snprintf(fname, PATH_MAX, IIO_DEVICE_DIR"/iio:device%i/scan_elements/%s", is[i].iionum, dent->d_name);
-				sysfs_write_val(fname, 0);
-			}
-		}
-
-		closedir(d);
-	}
-}
-
-
-void mainloop(int count, struct IIO_Sensor *is,
-		const int sencount, const int reclen)
-{
-	int fd, ret;
-	char dname[PATH_MAX];
-	char *buf;
-	int i;
-	struct pollfd pfd[10];
-	int nfd = 0;
-	int used;
-
-	buf = malloc(reclen*5);
-	if (buf == NULL) return;
-
-	for (i = 0; i < sencount; i++) {
-		snprintf(dname, PATH_MAX, "/dev/iio:device%i", is[nfd].iionum);
-
-		fd = open(dname, O_RDONLY);
-		if (fd < 0) return;
-
-		pfd[nfd].fd = fd;
-		pfd[nfd].events = POLLIN;
-		nfd++;
-	}
-	while((count < 0) || count > 0) {
-		if (count > 0)
-			count--;	
-
-		if (poll(pfd, nfd, -1) <= 0)
-			continue;
-		for (i = 0; i < sencount; i++) {
-			if (!(pfd[i].revents&POLLIN))
-				continue;
-			ret = read(pfd[i].fd, buf, reclen*5);
-			if (ret > 0)
-				while (0) {printf("Got data %i\n", ret);}
-			else
-				continue;
-			used = 0;
-			do {
-				parse_iiodata(&is[i], buf+used, ret);
-				ret -= is[i].rec_sz;
-				used+= is[i].rec_sz;
-			} while (ret > 0);
-		}
-	}
-}
-
-#endif
