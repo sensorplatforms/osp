@@ -22,6 +22,7 @@ struct OSPDaemon_output {
 	int usage;
 	int format;
 	struct queue q;
+	int option;
 };
 
 enum {
@@ -50,6 +51,13 @@ enum {
 	DRIVER_TYPE_INPUT,
 	DRIVER_TYPE_OUTPUT,
 };
+
+/* Output embedded time stamps */
+#define INPUT_OPTION_EMBEDTS	(1<<0)
+/* Send all 4 elements of a quaternion */
+#define INPUT_OPTION_QUAT4	(1<<1)
+/* Dither output to defeat input event dup rejection */
+#define INPUT_OPTION_DITHER	(1<<2)
 
 static inline void conv2OSP(ASensorType_t sensor,
 	OSP_InputSensorData_t *d, unsigned long long ts,
@@ -193,6 +201,7 @@ struct OSPDaemon_SensorDetail {
 	int noprocess;
 	int format;
 	OSP_InputSensorData_t pdata;
+	int option;
 };
 
 struct OSPDaemon_SensorDescription {

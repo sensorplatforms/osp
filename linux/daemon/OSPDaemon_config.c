@@ -61,6 +61,7 @@ static int proc_output_format(int linetype, int tag, char *val, int *taglist);
 static int proc_sensor_format(int linetype, int tag, char *val, int *taglist);
 static int proc_system_calfile(int linetype, int tag, char *val, int *taglist);
 static int proc_system_pmdir(int linetype, int tag, char *val, int *taglist);
+static int proc_option(int linetype, int tag, char *val, int *taglist);
 
 enum {
 	LINE_UNKNOWN,
@@ -129,6 +130,7 @@ static const struct _keymap {
 	{"pmdir", proc_system_pmdir},
 	{"format", proc_output_format},
 	{"iformat", proc_sensor_format},
+	{"option", proc_option},
 };
 
 /* Parse a string containing 3 comma seperated values */
@@ -253,6 +255,28 @@ static int proc_output_noprocess(int linetype, int tag, char *val, int *taglist)
 
 	return 0;
 }
+static int proc_option(int linetype, int tag, char *val, int *taglist)
+{
+	unsigned int opt;
+
+	if (taglist[tag] < 0) {
+		if (linetype == LINE_SENSOR)
+			taglist[tag] = allocate_sensor();
+		else if (linetype == LINE_OUTPUT)
+			taglist[tag] = allocate_output();
+	}
+	DBGOUT("Line %s", LineName[linetype]);
+
+	opt = strtol(val, NULL, 0);
+	if (linetype == LINE_OUTPUT) {
+		Output[taglist[tag]].option = opt;
+	} else if (linetype == LINE_SENSOR) {
+		Sensor[taglist[tag]].option = opt;
+	} else {
+		return -1;
+	}
+}
+
 static int proc_output_format(int linetype, int tag, char *val, int *taglist)
 {
 	int shift;
