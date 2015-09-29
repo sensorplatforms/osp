@@ -47,13 +47,16 @@ static int OSPDaemon_input_create(struct OSPDaemon_output *out)
 	uindev.absmax[ABS_X] = 1023;
 	uindev.absmin[ABS_Y] = 0;
 	uindev.absmax[ABS_Y] = 1023;
+	uindev.absmin[ABS_Z] = 0;
+	uindev.absmax[ABS_Z] = 1023;
+	uindev.absmin[ABS_WHEEL] = 0;
+	uindev.absmax[ABS_WHEEL] = 1023;
 
 	ret = write(fd, &uindev, sizeof(uindev));
 	if (ret < 0) {
 		perror("uindev write");
 		goto error;
 	}
-
 
 	ret = ioctl(fd, UI_SET_EVBIT, EV_ABS);
 	if (ret < 0) {
@@ -80,8 +83,28 @@ static int OSPDaemon_input_create(struct OSPDaemon_output *out)
 
 	ret = ioctl(fd, UI_SET_ABSBIT, ABS_Z);
 	if (ret < 0) {
-		perror("ioctl ABS_Y ABSBIT");
+		perror("ioctl ABS_Z ABSBIT");
 		goto error;
+	}
+	if (out->option & INPUT_OPTION_EMBEDTS) {
+		ret = ioctl(fd, UI_SET_ABSBIT, ABS_THROTTLE);
+		if (ret < 0) {
+			perror("ioctl ABS_THROTTLE ABSBIT");
+			goto error;
+		}
+
+		ret = ioctl(fd, UI_SET_ABSBIT, ABS_RUDDER);
+		if (ret < 0) {
+			perror("ioctl ABS_RUDDER ABSBIT");
+			goto error;
+		}
+	}
+	if (out->option & INPUT_OPTION_QUAT4) {
+		ret = ioctl(fd, UI_SET_ABSBIT, ABS_WHEEL);
+		if (ret < 0) {
+			perror("ioctl ABS_WHEEL ABSBIT");
+			goto error;
+		}
 	}
 	
 	ret = ioctl(fd, UI_DEV_CREATE);
@@ -90,7 +113,6 @@ static int OSPDaemon_input_create(struct OSPDaemon_output *out)
 		goto error;
 	}
 	out->fd = fd;
-
 
 error:
 	if (fd < 0) {
@@ -123,8 +145,10 @@ static int OSPDaemon_input_send(struct OSPDaemon_output *out)
 	while ((od = OSPDaemon_queue_get(&out->q)) != NULL) {
 		vallen = extractOSP(out->type, od, &ts, val);
 		DBGOUT("Sending (INPUT) %i %i %i\n", val[0], val[1], val[2]);
-		noise++;
-		noise %= 2;
+		if (out->option & INPUT_OPTION_DITHER) {
+			noise++;
+			noise %= 2;
+		}
 		ev.type = EV_ABS;
 		ev.code = ABS_X;
 		ev.value = val[0]+noise;
@@ -141,11 +165,25 @@ static int OSPDaemon_input_send(struct OSPDaemon_output *out)
 		ev.code = ABS_Z;
 		ev.value = val[2]+noise;
 		ret = write(out->fd, &ev, sizeof(ev));
-		if ( ret <= 0) return 1;	
-		if (vallen > 3) {
+		if (ret <= 0) return 1;	
+		if (vallen > 3 && out->option & INPUT_OPTION_QUAT4) {
 			ev.type = EV_ABS;
-			ev.code = ABS_THROTTLE;	/* ??? */
+			ev.code = ABS_WHEEL;	/* ??? */
 			ev.value = val[3]+noise;	
+			ret = write(out->fd, &ev, sizeof(ev));
+			if ( ret <= 0) return 1;	
+		}
+		if (out->option & INPUT_OPTION_EMBEDTS) {
+			/* Upper 32 bit */
+			ev.type = EV_ABS;
+			ev.code = ABS_RUDDER;	/* ??? */
+			ev.value = (ts >> 32);
+			ret = write(out->fd, &ev, sizeof(ev));
+			if ( ret <= 0) return 1;	
+			/* Lower 32 bit */
+			ev.type = EV_ABS;
+			ev.code = ABS_THROTTLE;
+			ev.value = (ts & ((((unsigned long long)1)<<32)-1));
 			ret = write(out->fd, &ev, sizeof(ev));
 			if ( ret <= 0) return 1;	
 		}
