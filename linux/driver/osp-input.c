@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2041 Audience, Inc.
- * Written by Hunyue Yau <hy-git@hy-research.com>
+ * Written by Hunyue Yau <hy@hy-research.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -22,7 +22,7 @@
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/platform_device.h>
-#include "MQ_sensors.h"
+#include "osp-sensors.h"
 #include <linux/osp-sh.h>
 
 /* INPUT_ABS CONSTANTS */
@@ -100,7 +100,7 @@ static ssize_t osp_set_enable(struct device *dev, struct device_attribute *attr,
 	int i;
 	unsigned long v;
 
-	if (strict_strtoul(buf, 0, &v))
+	if (strict_strtoul(buf, 0, &v)) 
 		return -EINVAL;
 
 	for (i = 0; i < NUM_ANDROID_SENSOR_TYPE; i++) {
@@ -171,6 +171,7 @@ static void dataready(int sensor, int prv,
 		input_sync(input_dev);
 		break;
 	case SENSOR_ACCELEROMETER:
+		printk("HY-DBG: %s:%i ACCEL\n", __func__, __LINE__);
 	case SENSOR_MAGNETIC_FIELD:
 	case SENSOR_GYROSCOPE:
 	case SENSOR_ORIENTATION:
@@ -301,5 +302,5 @@ module_init(osp_input_init);
 
 
 MODULE_DESCRIPTION("OSP Input driver");
-MODULE_AUTHOR("Hunyue Yau <hy-git@hy-research.com>");
+MODULE_AUTHOR("Hunyue Yau <hy@hy-research.com>");
 MODULE_LICENSE("GPL");
