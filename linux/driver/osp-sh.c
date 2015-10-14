@@ -730,8 +730,8 @@ static void OSP_ReportSensor(struct osp_data *osp,
 
 	case SENSOR_ORIENTATION:
 		if (!and_sensor[spack->SType].dataready) break;
-		data.xyz.z = spack->P.OrientFixP.Pitch;
-		data.xyz.y = spack->P.OrientFixP.Roll;
+		data.xyz.y = spack->P.OrientFixP.Pitch;
+		data.xyz.z = spack->P.OrientFixP.Roll;
 		data.xyz.x = spack->P.OrientFixP.Yaw;
 		and_sensor[spack->SType].dataready(spack->SType, 0,
 			and_sensor[spack->SType].private,
