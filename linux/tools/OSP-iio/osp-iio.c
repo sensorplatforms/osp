@@ -75,7 +75,7 @@ struct IIO_Sensor {
 
 void usage(void)
 {
-	fprintf(stderr, "osp-iio [-l| -c COUNT] sensorname ...\n");
+	fprintf(stderr, "osp-iio [-l|-d|-c COUNT] sensorname ...\n");
 }
 
 /* 
