@@ -1,43 +1,77 @@
 Linux kernel driver for OSP sensor hub
 --------------------------------------
-The driver is composed of 2 parts. A core OSP packet parsing driver 
-and a driver responsible for outputing to userland in the desire fashion.
-The 2 parts communicate with a defined API. The userland driver attaches
-as a child driver of the main OSP driver. 
+The driver is composed of 3 parts. 
+1. Transport driver. This driver receives and sends OSP packets over a 
+particular transport medium. Currently, RPMSG and I2C are supported.
+2. Core OSP packet parsing driver. The transport driver hands received
+packets to the parsing driver. The parsing driver creates a child device
+that receives the parsed sensor data. 
+3. Output driver. This is responsible for presenting the OSP data to
+user land. Currently, an input events driver and an IIO driver is available.
 
-The API between the 2 parts is defined by linux/osp-sh.h. The API 
+Transport and the core parser communicate over a 2 callbacks (one for each
+direction of flow). The 2 directions of callbacks should not interact with
+each other unless care is made to avoid deadlocks. The output driver
+interacts with the core parser through callbacks but is instantiated as
+a child device of the parser driver.
+
+The Linux kernel driver flow is:
+1. Underlying hardware instantiate the appropriate OSP transport driver.
+2. The transport driver registers with the OSP core parser.
+3. The OSP core parser creates a child devie.
+4. The child device instantiates the output driver.
+
+The APIs between the parts are defined by linux/osp-sh.h. The API 
 consist of a callback registration to claim output for a particular 
 sensor type along with an enable/disable call. Once registered, the call
 back will be called wit the sensor data.
 
-Provided is 2 userland interface drivers. One provides data using the
-input event system. The other driver provides it using the IIO subsystem.
-
 Installation
 ------------
-Copy the contents of the linux directory into include/linux on your 
-kernel tree.
+Untar the gziped tar file in this directory on the top level of your
+Linux kernel tree. It will add the following files to your tree:
 
-Place osp-sh.c in an appropriate place and modify the Makefile to build it.
-It needs to be able to access the following header files.
-MQ_sensors.h
-SensorPackets.h
-osp_i2c_map.h
+drivers/misc/osp-sensors.h
+drivers/misc/osp-i2c.c
+drivers/misc/osp-sh.c
+drivers/misc/osp_i2c_map.h
+drivers/rpmsg/rpmsg_osp.c
+include/linux/osp-sh.h
+drivers/iio/imu/osp-iio.c
+drivers/iio/imu/osp-sensors.h
+drivers/misc/SensorPackets.h
 
-Connect the OSP I2C device with the osp-sh driver. The process will 
-depend on the version of the kernel. Currently, there is no specific
-hooks for device tree. For pre-device tree kernels, the board file
-will need to be modified or userland will need to manually instantiate
-the device.
+Please update your Makefile/Kconfig in drivers/misc, drivers/rpmsg and
+drivers/iio/imu to include the respective files.
+
+If outputing to the input event subsystem is needed, please add osp-input.c
+in this directory to your tree and update your Makefile/Kconfig as
+appropriate.
+
+You will need to add appropriate glue depending on the version of kernel
+in use.
+
+a. For the I2C transport, you will need to connect the I2C hardware device
+(bus/address) with the OSP I2C driver.
+b. For the RPMSG transport will need to adjust the driver so it attaches to
+the name annonced by the remote end.
+
+Currently, none of these drivers have device tree specific hooks. For
+pre-device tree kernels, the board file can be modified. Otherwise, it can be
+done at run time.
 
 For the IIO option: (only 1 can be used at a time)
 Place osp-iio.c in the appropriate place for IIO drivers in your tree. This
 is often under drivers/iio or drivers/staging/iio. Modify the Makefile to 
-pickup the driver.
+pickup the driver. Have you config compile in osp-iio.c
 
 For the input event ouption:
 Place osp-input.c in the appropriate place. For example, drivers/input/misc.
-Modify the Makefile to pickup the driver.
+Have your config compile in osp-input.c.
+
+Compilation of more then one output driver is not supported. In otherwords,
+DO NOT COMPILE IN osp-iio.c with osp-input.c. They will both register
+as a osp-outut driver and the result is not deterministic.
 
 Notes:
 
@@ -61,3 +95,10 @@ using sysfs attributes. This is for debugging and non buffered output.
 
 Each sensor is presented as a seperate device. They are identified by 
 name.
+
+The RPMSG code can be tested using by simulating a RPMSG hub using
+a TI AM335x's PRUSS. OSP-i2c can be compiled with PRUSS_SIM defined
+and firmware installed on the PRUSS to take data from OSP-i2c and 
+translate it a RPMSG transport. Caveats - OSP messages larger then
+the RPMSG length will be dropped.
+
