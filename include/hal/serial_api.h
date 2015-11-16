@@ -51,7 +51,7 @@ typedef enum {
   SERIAL_LPC_1 = 1,
   SERIAL_LPC_2 = 2,
   SERIAL_LPC_MAX
-}i2c_num;
+}serial_num;
 
 typedef struct {
    uint8_t       serial_num;
