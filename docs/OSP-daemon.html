@@ -1,0 +1,132 @@
+<H1>OSPDaemon config file structure</H1>
+<H2>Comments</H2>
+<ul>
+	<li>Lines beginning with the following is consider a comment:
+		Space, tab, #, ;
+	<li>Blank lines are ignored.
+</ul>
+<H2>Line format</H2>
+	KEYn.tag=value
+<p>
+	Where KEY is:
+<dl>
+	<dt>system
+	<dt>output
+	<dd>This configures a sensor with data created or passed out by the daemon. It is for outbound data.
+	<dt>input
+	<dd>This configures a sensor that feeds data into the daemon. The data
+can be consumed and processed by algs and/or it can be merely copied out to an outbound sensor. 
+</dl>
+	n is an integer from 0 to 99. Each KEY has its own number space.<br>
+		This number is used to identify all the attributes related
+		to that entity. It is also used to reference the entity.
+
+<H2>Valid lines</H2>
+<dl>
+	<dt>output0.name and input0.name
+	<dd>This defines the name of the sensor. Exact usage depends on the
+driver.
+	<ul>
+		<li>For input event drivers, this is the name of the input
+device. For the outbound case, this is the name created. For the inbound case,
+this is the name to look for.
+		<li>For iio drivers, this is the name of the iio device to 
+look for.
+		<li>For file oriented drivers, this is the name of the file to
+read from or create/append. 
+	</ul>
+
+	<dt>output0.type and input0.type
+	<dd>This defines the type of sensor for output and input purposes. It
+should be a string like SENSOR_ACCELEROMETER. The name is defined by the
+enumerated type in OSP. Outbound sensors will come from either another 
+inbound sensor or from the algs.
+
+	<dt>output0.driver and input0.driver
+	<dd>This defines the driver associated with the entity. 
+
+	<dt>input0.copy
+	<dd>Defines an output sensor to send a copy of the data to. Value
+is the name of the output entity. For example:<p>
+input0.copy=output1<p>
+This will send a copy of data received on the input0 entity to output1 without
+any transformation.
+
+	<dt>input0.swap
+	<dd>This defines how the 3 axises from the input sensor will be 
+handled when it is process by the alg. This is specified by providing 3 
+comma seperated numbers: 0, 1, and 2 representing X, Y, and Z respectively.
+The order is X, Y, Z. Examples:<p>
+	<ul>
+		<li>No change: 0,1,2
+		<li>Swap X and Y: 1,0,2
+	</ul>
+	<dt>input0.convert
+	<dd>Define a conversion factor for each axis. This number is multiplied
+by the data prior being used. The number is a floating point value. The value can be provided in 2 formats.
+<ol>
+	<li>A single value. The same value is applied to all 3 axis.
+	<li>3 common seperated values. Each axis can have a unique value.
+</ol>
+This value is typically used to scale and if needed invert an axis.
+	<dt>input0.noise
+	<dd>Define a noise value for each axis. The number is a floating point value. The value can be provided in 2 formats.
+<ol>
+	<li>A single value. The same value is applied to all 3 axis.
+	<li>3 common seperated values. Each axis can have a unique value.
+</ol>
+This value is used by the algs.
+	<dt>output0.noprocess
+	<dd>Value is ignored. This attribute prevents the alg version of a 
+sensor from being used. For example, if there is an inbound data source for
+SENSOR_ACCELEROMETER and the alg also provides a SENSOR_ACCELEROMETER (prehaps
+as a calibrated or otherwise modified), this attribute will for the usage of
+the version directly from the inbound data source. Unless there is a corresponding copy from an inbound sensor, this output entity will preoduce no data.
+	<dt>input0.noprocess
+	<dd>Value is ignored. This attribute prevents the inbound data from
+being submitted to the algs. Unless there is a copy attibute, the data from
+this sensor is ignored.
+	<dt>output0.format
+	<dd>Modifies the value to fit a particular output format. This is
+used with the noprocess option. Valid options are:
+	<dl>
+		<dt>integer
+		<dd>Data is not modified.
+		<dt>float
+		<dd>Data is converted to a float first then the binary contents
+of the float is sent.
+		<dt>shift24
+		<dd>Shift data by 24 bits.
+		<dt>shift16
+		<dd>Shift data by 16 bits.
+		<dt>shift15
+		<dd>Shift data by 15 bits.
+		<dt>shift12
+		<dd>Shift data by 12 bits.
+	</dl>
+	<dt>input0.option, output0.option
+	<dd>This defines configuration option for the driver. Parameter is
+a value. Values beginning with 0x are considered to be hex. Meaning of the
+value depends on the driver. Currently, only the input event output driver
+uses this:
+	<ul>
+		<li>bit 0: Enable embedded time stamps. 64 bit time stamps
+as passed as ABS_THROTTLE (upper 32 bits)/ABS_RUDDER (lower 32bits)
+		<li>bit 1: Enable sending the 4th element of a quaternion.
+This value is passed as ABS_WHEEL.
+		<li>bit 2: Enable dittering of the output to defeat the input
+subsystem's duplicate value elimination. It adds a value from 0-2 to each
+data.
+	</ul>
+	<dt>system0.calfile
+	<dd>This defines the name of the file to write cal data to. The
+	last one specified will be used. Relative path are relative to the
+process working directory. To avoid surprises, use absolute paths.
+	<dt>system0.pmdir
+	<dd>Define a directory for enabling/disabling sensors. A path in a
+tmpfs is highly desireable to minimize flash wear.
+</dl>
+<hr>
+Updated 
+Fri Sep 11 18:35:37 PDT 2015
+

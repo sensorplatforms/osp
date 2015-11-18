@@ -146,23 +146,6 @@ typedef enum _SensorParamId {
 } SensorParamId_t;
 
 
-/* Enumeration for the input sensors. */
-typedef enum _InputSensor
-{
-    ACCEL_INPUT_SENSOR,
-    MAG_INPUT_SENSOR,
-    GYRO_INPUT_SENSOR,
-    LIGHT_INPUT_SENSOR,
-    PRESSURE_INPUT_SENSOR,
-    TEMPERATURE_INPUT_SENSOR,
-    PROXIMITY_INPUT_SENSOR,
-    RELATIVE_HUMIDITY_INPUT_SENSOR,
-    AMBIENT_TEMPERATURE_INPUT_SENSOR,
-
-    NUM_INPUT_SENSORS,
-    UNKNOWN_INPUT_SENSOR = 0xFF
-} InputSensor_t;
-
 // TODO:  Need more description how these are use.
 //! Segment detector subtypes
 typedef enum _SegmentSubType{

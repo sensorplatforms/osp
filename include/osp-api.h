@@ -199,8 +199,15 @@ typedef struct {
 
 //! Union structure to encapsulate various data types to library algorithm.
 typedef union {
-      Android_TriAxisRawSensorData_t data;
-      // Add any future input data type here as needed.
+	Android_TriAxisRawSensorData_t rawdata;
+	Android_TriAxisPreciseData_t q24data;
+	Android_TriAxisExtendedData_t q12data;
+	Android_UncalibratedTriAxisPreciseData_t uncal_q24data;
+	Android_UncalibratedTriAxisExtendedData_t uncal_q12data;
+	Android_OrientationResultData_t orientdata;
+	Android_BooleanResultData_t booldata;
+	Android_StepCounterResultData_t stepcount;
+	Android_RotationVectorResultData_t rotvec;
 }OSP_InputSensorData_t;
 
 //! callback type used when the library needs to do an atomic operation
@@ -293,8 +300,8 @@ typedef void  (* OSP_ResultReadyCallback_t)(ResultHandle_t ResultHandle, void* p
 */
 
 typedef struct  {
-    InputSensor_t SensorType;                   //!< physical sensor accel, gyro, etc input to fusion algorithm
-    char* SensorName;                           //!< short human readable description, Null terminated
+    ASensorType_t SensorType;                        //!<  sensor type from either the ASensorType_t or PSensorType_t list
+    char const * SensorName;                           //!< short human readable description, Null terminated
     uint32_t DataWidthMask;                     //!< how much of the data word that is sent significant
     AxisMapType_t AxisMapping[3];               //!< e.g. use to switch from left handed sensor to right handed system  or swap X and Y axes of a two axis sensor
     int32_t ConversionOffset[3];                //!< an offset for X,Y & Z to compensate for sensor origin (0,0,0)
@@ -402,7 +409,7 @@ OSP_STATUS_t     OSP_Initialize(const SystemDescriptor_t* pSystemDesc);
  *
  *  \return status as specified in OSP_Types.h
 */
-OSP_STATUS_t     OSP_RegisterInputSensor(SensorDescriptor_t *pSensorDescriptor,
+OSP_STATUS_t     OSP_RegisterInputSensor(const SensorDescriptor_t *pSensorDescriptor,
                      InputSensorHandle_t *pReturnedHandle);
 
 //! use to change a sensors operating mode (output rate, position, etc...)
